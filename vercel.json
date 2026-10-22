@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/frames-webp/:file", "destination": "https://cdn.jsdelivr.net/gh/llamanh0/mesleki-ingilizce-sunum@182f882e75c776fcb419e8c6f50621707e280497/frames-webp/:file" },
+    { "source": "/og.jpg", "destination": "https://cdn.jsdelivr.net/gh/llamanh0/mesleki-ingilizce-sunum@182f882e75c776fcb419e8c6f50621707e280497/og.jpg" }
+  ]
+}
