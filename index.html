@@ -201,7 +201,7 @@ body.is-locked { overflow: hidden; }
 /* ---------- Presenters ---------- */
 .credits {
   --av: clamp(150px, 16vw, 270px);         /* avatar width; height follows the 10:13 oval */
-  --a-top: calc(var(--st) + clamp(84px, 16vh, 170px));
+  --a-top: calc(var(--st) + clamp(96px, 18vh, 190px));
   --b-bottom: calc(var(--sb) + clamp(40px, 10vh, 120px));
   position: relative;
   height: 100vh; height: 100svh;
@@ -230,7 +230,7 @@ body.is-locked { overflow: hidden; }
 .orbit { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); overflow: visible; pointer-events: none; }
 .orbit ellipse { fill: none; stroke: var(--copper); stroke-width: .4; stroke-dasharray: 1; stroke-dashoffset: 0; }
 
-.person-name { margin: 0; font-size: clamp(30px, 5vw, 86px); font-weight: 600; letter-spacing: -.045em; line-height: .96; }
+.person-name { margin: 0; font-size: clamp(30px, 5vw, 86px); font-weight: 600; letter-spacing: -.045em; line-height: 1.12; } /* room for ç, ı and descenders inside the reveal masks */
 .person-name .line { display: block; }
 
 .thanks { position: absolute; inset: 0; z-index: 0; margin: 0; pointer-events: none; }
@@ -252,11 +252,14 @@ body.is-locked { overflow: hidden; }
 
 /* Narrow screens: the two presenters stack, "Thank you." sits between them on one line */
 @media (max-width: 699px), (max-aspect-ratio: 6/5) {
-  .credits { --av: clamp(118px, 34vw, 200px); --a-top: calc(var(--st) + 64px); --b-bottom: calc(var(--sb) + 48px); }
+  .credits { --av: clamp(118px, 34vw, 200px); --a-top: calc(var(--st) + clamp(96px, 13vh, 120px)); --b-bottom: calc(var(--sb) + 52px); }
   .person { gap: 14px; }
   .person-name { font-size: clamp(26px, 7.4vw, 44px); }
   .thanks { display: flex; align-items: center; justify-content: center; gap: .26em; font-size: clamp(54px, 15vw, 120px); }
-  .thanks-word { position: static; font-size: 1em; margin: 0; }
+  /* the two words step down, echoing the presenters' diagonal */
+  .thanks-word.w1, .thanks-word.w2 { position: static; font-size: 1em; }
+  .thanks-word.w1 { margin: 0 0 .3em; }
+  .thanks-word.w2 { margin: .3em 0 0; }
 }
 @media (min-width: 700px) and (max-height: 520px) {
   .credits { --av: 110px; --a-top: calc(var(--st) + 64px); --b-bottom: calc(var(--sb) + 28px); }
@@ -600,7 +603,7 @@ body.is-locked { overflow: hidden; }
     } else {
       const sEnd = vw / CONFIG.camera.span[CONFIG.camera.span.length - 1];
       const top = hero.offsetTop + hero.offsetHeight + 20;
-      const avail = Math.max(120, vh - top - 76);
+      const avail = Math.max(120, vh - top - 100); // keep the scroll cue clear
       const sStart = Math.max(sEnd, Math.min(avail / (R.y1 - R.y0), (vw * 0.62) / (R.x1 - R.x0)));
       L.sStart = sStart;
       L.sMid = Math.max(sStart, Math.min(vh / H, (vw * 0.8) / (R.x1 - R.x0)));
@@ -876,8 +879,9 @@ body.is-locked { overflow: hidden; }
           invalidateOnRefresh: true,
         },
       });
-      ctl.fromTo(A.el, { y: 36 }, { y: -36, duration: 2.8 }, 0)
-         .fromTo(B.el, { y: -36 }, { y: 36, duration: 2.8 }, 0)
+      const par = wide ? 36 : 14; // parallax depth in px; the two presenters drift apart
+      ctl.fromTo(A.el, { y: par }, { y: -par, duration: 2.8 }, 0)
+         .fromTo(B.el, { y: -par }, { y: par, duration: 2.8 }, 0)
          .fromTo(words[0], { x: drift }, { x: 0, duration: 2.8, ease: "power1.out" }, 0)
          .fromTo(words[1], { x: () => -drift() }, { x: 0, duration: 2.8, ease: "power1.out" }, 0)
          .fromTo(".credits-eyebrow", { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0);
