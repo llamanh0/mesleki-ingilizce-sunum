@@ -5,7 +5,7 @@
 A scroll-driven presentation for our Professional English course. As you scroll, a robot head comes apart
 frame by frame, and its five parts become the five sections of the talk.
 
-**Presented by** Hasan Batuhan Kılıçkan and Samet
+**Presented by** Hasan Batuhan Kılıçkan and Samet Burak Gülten
 
 ## Contents
 
@@ -24,7 +24,7 @@ frame by frame, and its five parts become the five sections of the talk.
 | Home / End | First / last step |
 | F | Fullscreen |
 
-The steps are: title → contents → each of the five sections → presenters → "Thank you."
+The steps are: title → contents → each of the five sections → presenters.
 
 ## How it works
 

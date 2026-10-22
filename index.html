@@ -200,72 +200,26 @@ body.is-locked { overflow: hidden; }
 
 /* ---------- Presenters ---------- */
 .credits {
-  --av: clamp(150px, 16vw, 270px);         /* avatar width; height follows the 10:13 oval */
-  --a-top: calc(var(--st) + clamp(96px, 18vh, 190px));
-  --b-bottom: calc(var(--sb) + clamp(40px, 10vh, 120px));
   position: relative;
-  height: 100vh; height: 100svh;
-  overflow: hidden;
-  background: radial-gradient(130% 90% at 50% 0%, var(--studio-low) 0%, var(--paper) 72%);
+  min-height: 100vh; min-height: 100svh;
+  display: grid; place-items: center;
+  padding-block: clamp(72px, 12vh, 140px);
+  padding-left: var(--gl); padding-right: var(--gr);
+  text-align: center;
+  background: linear-gradient(180deg, var(--studio-low) 0%, var(--paper) 100%);
 }
-.credits-eyebrow { position: absolute; z-index: 2; top: calc(var(--st) + clamp(24px, 6vh, 64px)); left: var(--gl); }
-
-.person { position: absolute; z-index: 1; margin: 0; display: flex; gap: clamp(16px, 2.2vw, 40px); }
-.person-a { left: var(--gl); top: var(--a-top); align-items: flex-end; }
-.person-b { right: var(--gr); bottom: var(--b-bottom); flex-direction: row-reverse; align-items: flex-start; text-align: right; }
-
-.avatar { position: relative; flex: none; width: var(--av); aspect-ratio: 10 / 13; filter: drop-shadow(0 26px 30px rgba(16, 20, 21, .24)); }
-.avatar-clip {
-  position: absolute; inset: 0; border-radius: 50%; overflow: hidden;
-  background: radial-gradient(120% 90% at 32% 22%, #f2f4f4 0%, #d6dadb 52%, #b8bdbf 100%);
+.credits-inner { width: 100%; max-width: 1100px; }
+.names {
+  list-style: none; margin: clamp(20px, 3.5vh, 36px) 0 0; padding: 0;
+  display: grid; gap: clamp(4px, 1vh, 12px);
 }
-.avatar-clip::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(16, 20, 21, .12); }
-.avatar-media { position: absolute; inset: 0; display: grid; place-items: center; }
-.avatar-media img {
-  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-  filter: grayscale(1) contrast(1.05); transition: filter .7s ease;
+.names li {
+  font-size: clamp(28px, 5.4vw, 76px); font-weight: 600; letter-spacing: -.035em;
+  line-height: 1.12;            /* room for ç, ı and ü inside the reveal masks */
+  text-wrap: balance;
 }
-.person:hover .avatar-media img { filter: none; }
-.monogram { font-size: calc(var(--av) * .28); font-weight: 600; letter-spacing: -.05em; line-height: 1; color: var(--ink); }
-.orbit { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); overflow: visible; pointer-events: none; }
-.orbit ellipse { fill: none; stroke: var(--copper); stroke-width: .4; stroke-dasharray: 1; stroke-dashoffset: 0; }
-
-.person-name { margin: 0; font-size: clamp(30px, 5vw, 86px); font-weight: 600; letter-spacing: -.045em; line-height: 1.12; } /* room for ç, ı and descenders inside the reveal masks */
-.person-name .line { display: block; }
-
-.thanks { position: absolute; inset: 0; z-index: 0; margin: 0; pointer-events: none; }
-.thanks-word {
-  position: absolute;
-  font-size: clamp(72px, 11.5vw, 220px); font-weight: 600; letter-spacing: -.06em; line-height: 1;
-  padding: .04em .06em .1em;
-  white-space: nowrap;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(16, 20, 21, .2);
-  background-image: linear-gradient(90deg, var(--ink) 0 50%, transparent 50% 100%);
-  background-size: 200% 100%;
-  background-position: 100% 0;
-  -webkit-background-clip: text; background-clip: text;
-}
-/* Z: "Thank" sits level with the first presenter, "you." level with the second */
-.thanks-word.w1 { right: var(--gr); top: calc(var(--a-top) + var(--av) * .65); margin-top: -.6em; }
-.thanks-word.w2 { left: var(--gl); bottom: calc(var(--b-bottom) + var(--av) * .65); margin-bottom: -.62em; }
-
-/* Narrow screens: the two presenters stack, "Thank you." sits between them on one line */
-@media (max-width: 699px), (max-aspect-ratio: 6/5) {
-  .credits { --av: clamp(118px, 34vw, 200px); --a-top: calc(var(--st) + clamp(96px, 13vh, 120px)); --b-bottom: calc(var(--sb) + 52px); }
-  .person { gap: 14px; }
-  .person-name { font-size: clamp(26px, 7.4vw, 44px); }
-  .thanks { display: flex; align-items: center; justify-content: center; gap: .26em; font-size: clamp(54px, 15vw, 120px); }
-  /* the two words step down, echoing the presenters' diagonal */
-  .thanks-word.w1, .thanks-word.w2 { position: static; font-size: 1em; }
-  .thanks-word.w1 { margin: 0 0 .3em; }
-  .thanks-word.w2 { margin: .3em 0 0; }
-}
-@media (min-width: 700px) and (max-height: 520px) {
-  .credits { --av: 110px; --a-top: calc(var(--st) + 64px); --b-bottom: calc(var(--sb) + 28px); }
-  .person-name { font-size: 36px; }
-  .thanks-word { font-size: 84px; }
-}
+.credits-rule { width: 56px; height: 1px; margin: clamp(32px, 6vh, 56px) auto clamp(16px, 2.5vh, 22px); background: var(--ink); transform-origin: 50% 50%; }
+.thanks { margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
 
 /* ---------- Static fallback (no JS, no GSAP, or reduced motion) ---------- */
 :is(.no-js .stage, .stage[data-layout="static"]) { height: auto; overflow: visible; padding-bottom: 56px; }
@@ -279,7 +233,6 @@ body.is-locked { overflow: hidden; }
   display: grid; gap: 20px; padding: 0 var(--gr) 0 var(--gl);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
 }
-:is(.no-js, [data-motion="static"]) .thanks-word { background-position: 0 0; }
 </style>
 </head>
 <body>
@@ -360,31 +313,15 @@ body.is-locked { overflow: hidden; }
       </section>
 
       <section class="credits" id="credits" aria-labelledby="credits-title">
-        <p class="eyebrow credits-eyebrow" id="credits-title">Presented by</p>
-
-        <p class="thanks" id="thanks"><span class="thanks-word w1">Thank</span> <span class="thanks-word w2">you.</span></p>
-
-        <figure class="person person-a">
-          <div class="avatar">
-            <svg class="orbit" viewBox="0 0 100 130" preserveAspectRatio="none" aria-hidden="true"><ellipse cx="50" cy="65" rx="49.5" ry="64.5" pathLength="1"/></svg>
-            <div class="avatar-clip">
-              <!-- To use a photo: add it as avatars/hasan.webp and set data-photo="avatars/hasan.webp" -->
-              <div class="avatar-media" data-photo=""><span class="monogram" aria-hidden="true">HBK</span></div>
-            </div>
-          </div>
-          <figcaption class="person-name"><span class="line">Hasan Batuhan</span> <span class="line">Kılıçkan</span></figcaption>
-        </figure>
-
-        <figure class="person person-b">
-          <div class="avatar">
-            <svg class="orbit" viewBox="0 0 100 130" preserveAspectRatio="none" aria-hidden="true"><ellipse cx="50" cy="65" rx="49.5" ry="64.5" pathLength="1"/></svg>
-            <div class="avatar-clip">
-              <!-- To use a photo: add it as avatars/samet.webp and set data-photo="avatars/samet.webp" -->
-              <div class="avatar-media" data-photo=""><span class="monogram" aria-hidden="true">S</span></div>
-            </div>
-          </div>
-          <figcaption class="person-name"><span class="line">Samet</span></figcaption>
-        </figure>
+        <div class="credits-inner">
+          <p class="eyebrow" id="credits-title">Presented by</p>
+          <ul class="names">
+            <li>Hasan Batuhan Kılıçkan</li>
+            <li>Samet Burak Gülten</li>
+          </ul>
+          <div class="credits-rule" aria-hidden="true"></div>
+          <p class="thanks">Thank you</p>
+        </div>
       </section>
     </main>
   </div>
@@ -415,8 +352,7 @@ body.is-locked { overflow: hidden; }
       span: [490, 490, 492, 555, 698, 885, 1068, 1219, 1324, 1403, 1532, 1614, 1631, 1638, 1692, 1716, 1716, 1718, 1720, 1723, 1728],
       center: [960, 960, 960, 962, 969, 983, 1005, 1033, 1058, 1060, 1035, 998, 963, 946, 951, 965, 969, 969, 969, 970, 970],
     },
-    scrollLength: 4.6,          // pinned scroll distance of the robot scene, in viewport heights
-    creditsLength: [1.7, 1.3],  // pinned scroll distance of the closing scene: wide, narrow
+    scrollLength: 4.2,          // pinned scroll distance of the robot scene, in viewport heights
     skipAfter: 9000,            // ms before "Continue while loading" appears
   };
   const WIDE = "(min-width: 700px) and (min-aspect-ratio: 6/5)";
@@ -446,22 +382,10 @@ body.is-locked { overflow: hidden; }
   const loaderText = $("#loader-text");
   const loaderSkip = $("#loader-skip");
   const credits = $("#credits");
-  const people = $$(".person", credits);
-  const words = $$(".thanks-word", credits);
   const LAST = CONFIG.frameCount - 1;
   const pad3 = (n) => String(n).padStart(3, "0");
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-
-  // Optional presenter photos (set data-photo on .avatar-media); the monogram stays as the fallback.
-  $$(".avatar-media[data-photo]").forEach((m) => {
-    const src = m.getAttribute("data-photo");
-    if (!src) return;
-    const img = new Image();
-    img.alt = "";
-    img.onload = () => m.appendChild(img);
-    img.src = src;
-  });
 
   function goStatic() {
     root.dataset.motion = "static";
@@ -857,69 +781,16 @@ body.is-locked { overflow: hidden; }
       });
       tl.to({}, { duration: 1.0 }); // a beat on the finished contents before the page moves on
 
-      /* --- Closing scene: presenters on a diagonal, "Thank you." fills in --- */
-      const [A, B] = people.map((p) => ({
-        el: p,
-        avatar: p.querySelector(".avatar"),
-        orbit: p.querySelector(".orbit ellipse"),
-        clip: p.querySelector(".avatar-clip"),
-        media: p.querySelector(".avatar-media"),
-        name: p.querySelector(".person-name"),
-      }));
-      const drift = () => window.innerWidth * (wide ? 0.06 : 0.03);
+      /* --- Presenters: a short reveal that plays once as the section comes into view (no pinning) --- */
+      const names = $$(".names li", credits);
       const ctl = gsap.timeline({
-        defaults: { ease: "none" },
-        scrollTrigger: {
-          trigger: credits,
-          start: "top top",
-          end: () => "+=" + Math.round(window.innerHeight * CONFIG.creditsLength[wide ? 0 : 1]),
-          pin: true,
-          scrub: 0.8,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
+        defaults: { ease: "expo.out" },
+        scrollTrigger: { trigger: credits, start: "top 65%", toggleActions: "play none none reverse" },
       });
-      const par = wide ? 36 : 14; // parallax depth in px; the two presenters drift apart
-      ctl.fromTo(A.el, { y: par }, { y: -par, duration: 2.8 }, 0)
-         .fromTo(B.el, { y: -par }, { y: par, duration: 2.8 }, 0)
-         .fromTo(words[0], { x: drift }, { x: 0, duration: 2.8, ease: "power1.out" }, 0)
-         .fromTo(words[1], { x: () => -drift() }, { x: 0, duration: 2.8, ease: "power1.out" }, 0)
-         .fromTo(".credits-eyebrow", { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0);
-      [A, B].forEach((P, i) => {
-        const at = 0.05 + i * 0.5;
-        ctl.fromTo(P.orbit, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, at)
-           .fromTo(P.clip, { clipPath: i === 0 ? "inset(100% 0% 0% 0%)" : "inset(0% 0% 100% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.7, ease: "power3.out" }, at + 0.05)
-           .fromTo(P.media, { scale: 1.3 }, { scale: 1, duration: 1.0, ease: "power3.out" }, at + 0.05);
-        const s = split(P.name, "chars");
-        if (s) ctl.from(s.chars, { yPercent: 110, rotate: 6, duration: 0.6, stagger: 0.025, ease: "power3.out" }, at + 0.25);
-        else ctl.fromTo(P.name, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" }, at + 0.25);
-      });
-      ctl.addLabel("people", 1.5)
-         .fromTo(words[0], { backgroundPosition: "100% 0%" }, { backgroundPosition: "0% 0%", duration: 0.6, ease: "power1.inOut" }, 1.55)
-         .fromTo(words[1], { backgroundPosition: "100% 0%" }, { backgroundPosition: "0% 0%", duration: 0.6, ease: "power1.inOut" }, 1.95)
-         .to({}, { duration: 0.25 }, 2.55);
-
-      // Desktop: the ovals lean toward the cursor.
-      let offTilt = null;
-      if (fine) {
-        const tilts = [A, B].map((P) => {
-          gsap.set(P.avatar, { transformPerspective: 900 });
-          return {
-            box: P.avatar,
-            rx: gsap.quickTo(P.avatar, "rotationX", { duration: 0.8, ease: "power3" }),
-            ry: gsap.quickTo(P.avatar, "rotationY", { duration: 0.8, ease: "power3" }),
-          };
-        });
-        const onMove = (e) => tilts.forEach((t) => {
-          const r = t.box.getBoundingClientRect();
-          t.ry(clamp((e.clientX - (r.left + r.width / 2)) / window.innerWidth, -0.5, 0.5) * 16);
-          t.rx(clamp((e.clientY - (r.top + r.height / 2)) / window.innerHeight, -0.5, 0.5) * -16);
-        });
-        const onLeave = () => tilts.forEach((t) => { t.rx(0); t.ry(0); });
-        credits.addEventListener("pointermove", onMove);
-        credits.addEventListener("pointerleave", onLeave);
-        offTilt = () => { credits.removeEventListener("pointermove", onMove); credits.removeEventListener("pointerleave", onLeave); };
-      }
+      ctl.fromTo("#credits-title", { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.8 }, 0);
+      names.forEach((el, i) => rise(ctl, el, 0.1 + i * 0.16, 0.06, 1.2));
+      ctl.fromTo(".credits-rule", { scaleX: 0 }, { scaleX: 1, duration: 1, ease: "power3.inOut" }, 0.45)
+         .fromTo(".thanks", { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.8 }, 0.6);
 
       // Beats for presentation mode, read from the timelines so they follow any resize.
       const posOf = (timeline, label) => {
@@ -930,12 +801,10 @@ body.is-locked { overflow: hidden; }
         0,
         posOf(tl, "contents-shown"),
         ...parts.map((p, i) => posOf(tl, "part-" + i)),
-        posOf(ctl, "people"),
-        Math.round(ctl.scrollTrigger.end),
+        Math.round(ScrollTrigger.maxScroll(window)),   // the presenters page
       ];
 
       return () => {
-        if (offTilt) offTilt();
         splits.forEach((s) => s.revert());
         stage.classList.remove("no-head", "compact");
         if (smoother) { smoother.kill(); smoother = null; }
