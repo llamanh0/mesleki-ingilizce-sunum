@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI in Everyday Life and Computer Engineering</title>
+<meta name="description" content="A scroll-driven presentation in five parts on AI in everyday life and computer engineering.">
+<meta name="theme-color" content="#c8cccd">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AI in Everyday Life and Computer Engineering">
+<meta property="og:description" content="A scroll-driven presentation in five parts.">
+<meta property="og:url" content="https://mesleki-ingilizce-sunum.vercel.app/">
+<meta property="og:image" content="https://mesleki-ingilizce-sunum.vercel.app/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A robot head taken apart into five components">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" as="image" href="frames-webp/frame-001.webp" fetchpriority="high">
+<script>document.documentElement.className = "js";</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one pinned, full-bleed canvas; text lives in the empty studio space around the robot.
+   The closing scene is a Z: presenter top-left, "Thank" top-right, "you." bottom-left, presenter bottom-right. */
+:root {
+  --studio-top: #c0c4c5;
+  --studio: #c8cccd;
+  --studio-low: #d0d4d5;
+  --paper: #e3e6e6;
+  --ink: #101415;
+  --ink-2: #364043;
+  --ink-3: #5a6467;
+  --rule: rgba(16, 20, 21, .22);
+  --copper: #7a4426;            /* the wiring inside the head */
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, Arial, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --gl: max(clamp(16px, 5vw, 80px), env(safe-area-inset-left, 0px));
+  --gr: max(clamp(16px, 5vw, 80px), env(safe-area-inset-right, 0px));
+  --st: env(safe-area-inset-top, 0px);
+  --sb: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--studio);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+body.is-locked { overflow: hidden; }
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--copper);
+}
+
+/* ---------- Stage ---------- */
+.stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--studio-top) 0%, var(--studio) 45%, var(--studio-low) 100%);
+}
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.static-frame { display: none; }
+.js .stage[data-layout="pending"] :is(.hero, .contents-head, .parts, .cue, .hud) { visibility: hidden; }
+
+/* ---------- Title ---------- */
+.hero { position: absolute; z-index: 2; pointer-events: none; }
+.hero h1 {
+  margin: 14px 0 0;
+  font-weight: 600; letter-spacing: -.035em; line-height: 1.02;
+  text-wrap: balance;
+}
+.hero-note { margin: 18px 0 0; font-size: 15px; line-height: 1.45; color: var(--ink-2); }
+
+[data-layout="wide"] .hero {
+  left: var(--gl); top: 0; bottom: 0;
+  width: var(--hero-w, 420px);
+  display: flex; flex-direction: column; justify-content: center;
+}
+[data-layout="wide"] .hero h1 { font-size: clamp(30px, 3.4vw, 60px); }
+[data-layout="narrow"] .hero { left: var(--gl); right: var(--gr); top: calc(var(--st) + clamp(20px, 6vh, 56px)); }
+[data-layout="narrow"] .hero h1 { font-size: clamp(28px, 7.6vw, 46px); }
+[data-layout="narrow"] .hero-note { margin-top: 12px; font-size: 14px; }
+
+/* ---------- Scroll cue + progress ---------- */
+.cue {
+  position: absolute; z-index: 2; left: 50%;
+  bottom: calc(var(--sb) + clamp(14px, 3.5vh, 36px));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.cue-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  white-space: nowrap; color: var(--ink-2);
+}
+.cue-line { position: relative; width: 1px; height: 36px; overflow: hidden; background: var(--rule); }
+.cue-line::after {
+  content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--ink);
+  animation: cue 1.8s cubic-bezier(.6, 0, .2, 1) infinite;
+}
+@keyframes cue { to { transform: translateY(350%); } }
+
+.hud {
+  position: absolute; z-index: 2;
+  left: var(--gl); right: var(--gr); bottom: calc(var(--sb) + 18px);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none; visibility: hidden;
+}
+.hud-track { position: relative; flex: 0 1 180px; height: 1px; overflow: hidden; background: var(--rule); }
+.hud-fill { position: absolute; inset: 0; background: var(--ink); transform-origin: 0 50%; transform: scaleX(0); }
+
+/* ---------- Contents ---------- */
+.contents-head { position: absolute; z-index: 2; pointer-events: none; }
+.contents-head h2 { margin: 8px 0 0; font-size: clamp(26px, 2.6vw, 40px); font-weight: 600; letter-spacing: -.03em; line-height: 1.05; }
+[data-layout="wide"] .contents-head { top: calc(var(--st) + clamp(20px, 5.5vh, 64px)); left: 0; right: 0; text-align: center; }
+[data-layout="narrow"] .contents-head { top: calc(var(--st) + 18px); left: var(--gl); right: var(--gr); }
+[data-layout="narrow"] .contents-head h2 { font-size: 24px; }
+.no-head .contents-head { display: none; }
+
+.parts { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.parts-list { list-style: none; margin: 0; padding: 0; }
+.part { position: relative; }
+.part-line { position: absolute; background: var(--rule); }
+.part .num {
+  display: block;
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .08em;
+  color: var(--copper); font-variant-numeric: tabular-nums;
+}
+.part h3 { margin: 6px 0 8px; font-size: clamp(15px, 1.3vw, 20px); font-weight: 600; letter-spacing: -.015em; line-height: 1.15; }
+.part ul { list-style: none; margin: 0; padding: 0; }
+.part li { font-size: clamp(12.5px, .9vw, 14px); line-height: 1.35; color: var(--ink-2); }
+.part li + li { margin-top: 3px; }
+
+/* Wide: each label hangs under its part */
+[data-layout="wide"] .part {
+  position: absolute; left: 0; top: 0;
+  width: var(--label-w, 200px); margin-left: calc(var(--label-w, 200px) / -2);
+  padding-top: 26px; text-align: center;
+}
+[data-layout="wide"] .part-line { top: 0; left: 50%; width: 1px; height: 16px; transform-origin: 50% 0; }
+.compact[data-layout="wide"] .part h3 { font-size: 14px; margin-bottom: 5px; }
+.compact[data-layout="wide"] .part li { font-size: 11.5px; }
+
+/* Narrow: numbered badges on the parts, a list underneath */
+.marker {
+  position: absolute; left: 0; top: 0; margin: -12px 0 0 -12px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500; line-height: 24px; text-align: center;
+  visibility: hidden;
+}
+[data-layout="wide"] .marker { display: none; }
+[data-layout="narrow"] .parts-list { position: absolute; left: var(--gl); right: var(--gr); top: 0; }
+[data-layout="narrow"] .part { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: 8px; padding: 10px 0; transform: none; }
+[data-layout="narrow"] .part-line { top: 0; left: 0; right: 0; height: 1px; transform-origin: 0 50%; }
+[data-layout="narrow"] .part .num { grid-row: 1 / span 2; padding-top: 3px; }
+[data-layout="narrow"] .part :is(h3, ul) { grid-column: 2; }
+[data-layout="narrow"] .part h3 { margin: 0 0 3px; font-size: 16px; }
+[data-layout="narrow"] .part ul { display: flex; flex-wrap: wrap; }
+[data-layout="narrow"] .part li { margin: 0; font-size: 13px; }
+[data-layout="narrow"] .part li:not(:last-child)::after { content: "·"; margin: 0 6px; color: var(--ink-3); }
+.compact[data-layout="narrow"] .part { padding: 7px 0; }
+.compact[data-layout="narrow"] .part h3 { font-size: 15px; }
+.compact[data-layout="narrow"] .part li { font-size: 12px; }
+
+/* ---------- Loader ---------- */
+.loader {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: rgba(200, 204, 205, .6);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.loader-track { position: relative; width: min(220px, 60vw); height: 1px; overflow: hidden; background: var(--rule); }
+.loader-fill { position: absolute; inset: 0; background: var(--ink); transform-origin: 0 50%; transform: scaleX(0); transition: transform .2s linear; }
+.loader-text {
+  margin: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-2); font-variant-numeric: tabular-nums;
+}
+.loader-skip {
+  font: 500 12px var(--font-sans); color: var(--ink);
+  background: none; border: 1px solid var(--rule); border-radius: 999px; padding: 7px 16px; cursor: pointer;
+  opacity: 0; pointer-events: none; transition: opacity .3s;
+}
+.loader-skip.show { opacity: 1; pointer-events: auto; }
+.loader-skip:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+/* ---------- Presenters ---------- */
+.credits {
+  --av: clamp(150px, 16vw, 270px);         /* avatar width; height follows the 10:13 oval */
+  --a-top: calc(var(--st) + clamp(84px, 16vh, 170px));
+  --b-bottom: calc(var(--sb) + clamp(40px, 10vh, 120px));
+  position: relative;
+  height: 100vh; height: 100svh;
+  overflow: hidden;
+  background: radial-gradient(130% 90% at 50% 0%, var(--studio-low) 0%, var(--paper) 72%);
+}
+.credits-eyebrow { position: absolute; z-index: 2; top: calc(var(--st) + clamp(24px, 6vh, 64px)); left: var(--gl); }
+
+.person { position: absolute; z-index: 1; margin: 0; display: flex; gap: clamp(16px, 2.2vw, 40px); }
+.person-a { left: var(--gl); top: var(--a-top); align-items: flex-end; }
+.person-b { right: var(--gr); bottom: var(--b-bottom); flex-direction: row-reverse; align-items: flex-start; text-align: right; }
+
+.avatar { position: relative; flex: none; width: var(--av); aspect-ratio: 10 / 13; filter: drop-shadow(0 26px 30px rgba(16, 20, 21, .24)); }
+.avatar-clip {
+  position: absolute; inset: 0; border-radius: 50%; overflow: hidden;
+  background: radial-gradient(120% 90% at 32% 22%, #f2f4f4 0%, #d6dadb 52%, #b8bdbf 100%);
+}
+.avatar-clip::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(16, 20, 21, .12); }
+.avatar-media { position: absolute; inset: 0; display: grid; place-items: center; }
+.avatar-media img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(1) contrast(1.05); transition: filter .7s ease;
+}
+.person:hover .avatar-media img { filter: none; }
+.monogram { font-size: calc(var(--av) * .28); font-weight: 600; letter-spacing: -.05em; line-height: 1; color: var(--ink); }
+.orbit { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); overflow: visible; pointer-events: none; }
+.orbit ellipse { fill: none; stroke: var(--copper); stroke-width: .4; stroke-dasharray: 1; stroke-dashoffset: 0; }
+
+.person-name { margin: 0; font-size: clamp(30px, 5vw, 86px); font-weight: 600; letter-spacing: -.045em; line-height: .96; }
+.person-name .line { display: block; }
+
+.thanks { position: absolute; inset: 0; z-index: 0; margin: 0; pointer-events: none; }
+.thanks-word {
+  position: absolute;
+  font-size: clamp(72px, 11.5vw, 220px); font-weight: 600; letter-spacing: -.06em; line-height: 1;
+  padding: .04em .06em .1em;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(16, 20, 21, .2);
+  background-image: linear-gradient(90deg, var(--ink) 0 50%, transparent 50% 100%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text;
+}
+/* Z: "Thank" sits level with the first presenter, "you." level with the second */
+.thanks-word.w1 { right: var(--gr); top: calc(var(--a-top) + var(--av) * .65); margin-top: -.6em; }
+.thanks-word.w2 { left: var(--gl); bottom: calc(var(--b-bottom) + var(--av) * .65); margin-bottom: -.62em; }
+
+/* Narrow screens: the two presenters stack, "Thank you." sits between them on one line */
+@media (max-width: 699px), (max-aspect-ratio: 6/5) {
+  .credits { --av: clamp(118px, 34vw, 200px); --a-top: calc(var(--st) + 64px); --b-bottom: calc(var(--sb) + 48px); }
+  .person { gap: 14px; }
+  .person-name { font-size: clamp(26px, 7.4vw, 44px); }
+  .thanks { display: flex; align-items: center; justify-content: center; gap: .26em; font-size: clamp(54px, 15vw, 120px); }
+  .thanks-word { position: static; font-size: 1em; margin: 0; }
+}
+@media (min-width: 700px) and (max-height: 520px) {
+  .credits { --av: 110px; --a-top: calc(var(--st) + 64px); --b-bottom: calc(var(--sb) + 28px); }
+  .person-name { font-size: 36px; }
+  .thanks-word { font-size: 84px; }
+}
+
+/* ---------- Static fallback (no JS, no GSAP, or reduced motion) ---------- */
+:is(.no-js .stage, .stage[data-layout="static"]) { height: auto; overflow: visible; padding-bottom: 56px; }
+:is(.no-js .stage, .stage[data-layout="static"]) :is(canvas, .loader, .cue, .hud, .marker, .part-line) { display: none; }
+:is(.no-js .stage, .stage[data-layout="static"]) :is(.hero, .contents-head, .parts, .parts-list, .part) { position: static; }
+:is(.no-js .stage, .stage[data-layout="static"]) .hero { padding: calc(var(--st) + 56px) var(--gr) 32px var(--gl); max-width: 980px; }
+:is(.no-js .stage, .stage[data-layout="static"]) .hero h1 { font-size: clamp(32px, 5vw, 64px); }
+:is(.no-js .stage, .stage[data-layout="static"]) .static-frame { display: block; width: 100%; height: auto; }
+:is(.no-js .stage, .stage[data-layout="static"]) .contents-head { padding: 40px var(--gr) 16px var(--gl); }
+:is(.no-js .stage, .stage[data-layout="static"]) .parts-list {
+  display: grid; gap: 20px; padding: 0 var(--gr) 0 var(--gl);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+}
+:is(.no-js, [data-motion="static"]) .thanks-word { background-position: 0 0; }
+</style>
+</head>
+<body>
+<div id="smooth-wrapper">
+  <div id="smooth-content">
+    <main>
+      <section class="sequence" id="sequence" aria-label="Introduction and contents">
+        <div class="stage" id="stage" data-layout="pending">
+          <canvas id="seq" aria-hidden="true"></canvas>
+          <img class="static-frame" src="frames-webp/frame-240.webp" alt="A robot head taken apart into five components">
+
+          <header class="hero" id="hero">
+            <p class="eyebrow">Presentation</p>
+            <h1 id="hero-title">AI in Everyday Life and Computer Engineering</h1>
+            <p class="hero-note">A talk in five parts.</p>
+          </header>
+
+          <div class="cue" id="cue" aria-hidden="true">
+            <div class="cue-inner"><span id="cue-label">Scroll</span><span class="cue-line"></span></div>
+          </div>
+
+          <div class="hud" id="hud" aria-hidden="true">
+            <span class="hud-track"><span class="hud-fill" id="hud-fill"></span></span>
+            <span id="hud-count">001 / 240</span>
+          </div>
+
+          <div class="contents-head" id="contents-head">
+            <p class="eyebrow">Contents</p>
+            <h2 id="contents-title">What we’ll cover</h2>
+          </div>
+
+          <div class="parts" id="parts">
+            <span class="marker" aria-hidden="true">1</span>
+            <span class="marker" aria-hidden="true">2</span>
+            <span class="marker" aria-hidden="true">3</span>
+            <span class="marker" aria-hidden="true">4</span>
+            <span class="marker" aria-hidden="true">5</span>
+            <ol class="parts-list" id="parts-list">
+              <li class="part">
+                <span class="part-line" aria-hidden="true"></span>
+                <span class="num">01</span>
+                <h3>Introduction</h3>
+                <ul><li>AI in Everyday Life and Computer Engineering</li><li>Agenda</li></ul>
+              </li>
+              <li class="part">
+                <span class="part-line" aria-hidden="true"></span>
+                <span class="num">02</span>
+                <h3>Understanding AI</h3>
+                <ul><li>What Is AI?</li><li>A Brief History of AI</li></ul>
+              </li>
+              <li class="part">
+                <span class="part-line" aria-hidden="true"></span>
+                <span class="num">03</span>
+                <h3>AI in Daily Life</h3>
+                <ul><li>Everyday Examples</li><li>Benefits and Risks</li></ul>
+              </li>
+              <li class="part">
+                <span class="part-line" aria-hidden="true"></span>
+                <span class="num">04</span>
+                <h3>AI in Our Field</h3>
+                <ul><li>AI Tools and Use Cases</li><li>How LLMs Work</li><li>Basic vs. Technical Prompts</li><li>Token Efficiency and Accuracy</li></ul>
+              </li>
+              <li class="part">
+                <span class="part-line" aria-hidden="true"></span>
+                <span class="num">05</span>
+                <h3>Conclusion</h3>
+                <ul><li>Using AI Responsibly</li><li>Key Takeaways</li></ul>
+              </li>
+            </ol>
+          </div>
+
+          <div class="loader" id="loader" role="status" aria-live="polite">
+            <div class="loader-track"><span class="loader-fill" id="loader-fill"></span></div>
+            <p class="loader-text" id="loader-text">Loading frames</p>
+            <button class="loader-skip" id="loader-skip" type="button">Continue while loading</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="credits" id="credits" aria-labelledby="credits-title">
+        <p class="eyebrow credits-eyebrow" id="credits-title">Presented by</p>
+
+        <p class="thanks" id="thanks"><span class="thanks-word w1">Thank</span> <span class="thanks-word w2">you.</span></p>
+
+        <figure class="person person-a">
+          <div class="avatar">
+            <svg class="orbit" viewBox="0 0 100 130" preserveAspectRatio="none" aria-hidden="true"><ellipse cx="50" cy="65" rx="49.5" ry="64.5" pathLength="1"/></svg>
+            <div class="avatar-clip">
+              <!-- To use a photo: add it as avatars/hasan.webp and set data-photo="avatars/hasan.webp" -->
+              <div class="avatar-media" data-photo=""><span class="monogram" aria-hidden="true">HBK</span></div>
+            </div>
+          </div>
+          <figcaption class="person-name"><span class="line">Hasan Batuhan</span> <span class="line">Kılıçkan</span></figcaption>
+        </figure>
+
+        <figure class="person person-b">
+          <div class="avatar">
+            <svg class="orbit" viewBox="0 0 100 130" preserveAspectRatio="none" aria-hidden="true"><ellipse cx="50" cy="65" rx="49.5" ry="64.5" pathLength="1"/></svg>
+            <div class="avatar-clip">
+              <!-- To use a photo: add it as avatars/samet.webp and set data-photo="avatars/samet.webp" -->
+              <div class="avatar-media" data-photo=""><span class="monogram" aria-hidden="true">S</span></div>
+            </div>
+          </div>
+          <figcaption class="person-name"><span class="line">Samet</span></figcaption>
+        </figure>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollSmoother.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollToPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ================= CONFIG ================= */
+  const CONFIG = {
+    frameCount: 240,
+    framePath: (i) => "frames-webp/frame-" + String(i + 1).padStart(3, "0") + ".webp",
+    imgW: 1920,
+    imgH: 1080,
+    robot: { x0: 745, x1: 1175, y0: 170, y1: 892 },   // the head in the first frame (image px)
+    partX: [285, 608, 974, 1336, 1649],                // centre of each part in the last frame
+    partTop: 274,
+    partBottom: 815,
+    fitWidth: 1760,             // wide screens: image px that must stay visible so all five parts fit
+    camera: {                   // narrow screens: width (incl. margin) and centre of the action, measured every 12 frames
+      every: 12,
+      span: [490, 490, 492, 555, 698, 885, 1068, 1219, 1324, 1403, 1532, 1614, 1631, 1638, 1692, 1716, 1716, 1718, 1720, 1723, 1728],
+      center: [960, 960, 960, 962, 969, 983, 1005, 1033, 1058, 1060, 1035, 998, 963, 946, 951, 965, 969, 969, 969, 970, 970],
+    },
+    scrollLength: 4.6,          // pinned scroll distance of the robot scene, in viewport heights
+    creditsLength: [1.7, 1.3],  // pinned scroll distance of the closing scene: wide, narrow
+    skipAfter: 9000,            // ms before "Continue while loading" appears
+  };
+  const WIDE = "(min-width: 700px) and (min-aspect-ratio: 6/5)";
+  const NARROW = "not all and (min-width: 700px) and (min-aspect-ratio: 6/5)";
+  const FINE = "(hover: hover) and (pointer: fine)";
+  /* ========================================== */
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const root = document.documentElement;
+  const body = document.body;
+  const stage = $("#stage");
+  const canvas = $("#seq");
+  const ctx = canvas.getContext("2d", { alpha: false });
+  const hero = $("#hero");
+  const cue = $("#cue");
+  const cueLabel = $("#cue-label");
+  const hud = $("#hud");
+  const hudFill = $("#hud-fill");
+  const hudCount = $("#hud-count");
+  const head = $("#contents-head");
+  const list = $("#parts-list");
+  const parts = $$(".part", list);
+  const markers = $$(".marker");
+  const loader = $("#loader");
+  const loaderFill = $("#loader-fill");
+  const loaderText = $("#loader-text");
+  const loaderSkip = $("#loader-skip");
+  const credits = $("#credits");
+  const people = $$(".person", credits);
+  const words = $$(".thanks-word", credits);
+  const LAST = CONFIG.frameCount - 1;
+  const pad3 = (n) => String(n).padStart(3, "0");
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+  // Optional presenter photos (set data-photo on .avatar-media); the monogram stays as the fallback.
+  $$(".avatar-media[data-photo]").forEach((m) => {
+    const src = m.getAttribute("data-photo");
+    if (!src) return;
+    const img = new Image();
+    img.alt = "";
+    img.onload = () => m.appendChild(img);
+    img.src = src;
+  });
+
+  function goStatic() {
+    root.dataset.motion = "static";
+    stage.dataset.layout = "static";
+    body.classList.remove("is-locked");
+  }
+
+  // No GSAP (blocked CDN) or the visitor asked for less motion: show the finished state as a normal page.
+  if (!window.gsap || !window.ScrollTrigger || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    goStatic();
+    return;
+  }
+  const hasSplit = !!window.SplitText;
+  const hasSmoother = !!window.ScrollSmoother;
+  const hasScrollTo = !!window.ScrollToPlugin;
+  gsap.registerPlugin(ScrollTrigger);
+  if (hasSplit) gsap.registerPlugin(SplitText);
+  if (hasSmoother) gsap.registerPlugin(ScrollSmoother);
+  if (hasScrollTo) gsap.registerPlugin(ScrollToPlugin);
+
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.scrollTo(0, 0);
+  body.classList.add("is-locked");
+  hudCount.textContent = pad3(1) + " / " + pad3(CONFIG.frameCount);
+
+  /* ---------------- Preload ---------------- */
+  const images = new Array(CONFIG.frameCount);
+  const ready = new Uint8Array(CONFIG.frameCount);
+  let settled = 0;
+
+  // First and last frame, then coarse-to-fine, so a usable spread exists early.
+  const order = [0, LAST];
+  const queued = new Set(order);
+  [32, 16, 8, 4, 2, 1].forEach((step) => {
+    for (let i = 0; i < CONFIG.frameCount; i += step) {
+      if (!queued.has(i)) { queued.add(i); order.push(i); }
+    }
+  });
+
+  function onSettled(i, ok) {
+    if (ok) ready[i] = 1;
+    settled++;
+    loaderFill.style.transform = "scaleX(" + (settled / CONFIG.frameCount).toFixed(3) + ")";
+    loaderText.textContent = "Loading frames " + pad3(settled) + " / " + pad3(CONFIG.frameCount);
+    if (ok && Math.abs(i - Math.round(state.frame)) < 4) invalidate();
+    if (settled === CONFIG.frameCount) begin();
+  }
+
+  order.forEach((i) => {
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = () => {
+      const decoded = img.decode ? img.decode().catch(() => {}) : Promise.resolve();
+      decoded.then(() => onSettled(i, true));
+    };
+    img.onerror = () => onSettled(i, false);
+    img.src = CONFIG.framePath(i);
+    images[i] = img;
+  });
+
+  const skipTimer = setTimeout(() => loaderSkip.classList.add("show"), CONFIG.skipAfter);
+  loaderSkip.addEventListener("click", begin);
+
+  // Draw the requested frame, or the nearest one that has arrived.
+  function frameImage(i) {
+    if (ready[i]) return images[i];
+    for (let d = 1; d < CONFIG.frameCount; d++) {
+      if (i - d >= 0 && ready[i - d]) return images[i - d];
+      if (i + d < CONFIG.frameCount && ready[i + d]) return images[i + d];
+    }
+    return null;
+  }
+
+  /* ---------------- Virtual camera + layout ---------------- */
+  // settle: on narrow screens the title leaves and the head moves to the centre | lift: room for the contents
+  const state = { frame: 0, settle: 0, lift: 0 };
+  const L = { mode: "pending", vw: 0, vh: 0, dpr: 1, sStart: 1, sMid: 1, sEnd: 1, cyStart: 0, cyMid: 0, cyEnd: 0 };
+  const BG = [[192, 196, 197, 0], [200, 204, 205, .45], [208, 212, 213, 1]];
+  let dirty = true;
+  const invalidate = () => { dirty = true; };
+
+  // Narrow-screen camera track: interpolates the measured keyframes at any (fractional) frame.
+  function track(values, f) {
+    const n = values.length - 1;
+    const at = (k) => (k === n ? LAST : k * CONFIG.camera.every);
+    const k = Math.min(n - 1, Math.floor(f / CONFIG.camera.every));
+    const u = clamp((f - at(k)) / (at(k + 1) - at(k)), 0, 1);
+    return lerp(values[k], values[k + 1], u);
+  }
+
+  function sizeCanvas() {
+    const vw = stage.clientWidth;
+    const vh = stage.clientHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (vw === L.vw && vh === L.vh && dpr === L.dpr) return;
+    L.vw = vw; L.vh = vh; L.dpr = dpr;
+    canvas.width = Math.round(vw * dpr);
+    canvas.height = Math.round(vh * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+  }
+
+  function bgAt(y) {
+    const t = clamp(y / (L.vh || 1), 0, 1);
+    const k = t < BG[1][3] ? 0 : 1;
+    const a = BG[k], b = BG[k + 1];
+    const u = (t - a[3]) / (b[3] - a[3]);
+    return [0, 1, 2].map((c) => Math.round(lerp(a[c], b[c], u)));
+  }
+
+  function measure() {
+    if (L.mode !== "wide" && L.mode !== "narrow") return;
+    sizeCanvas();
+    const { vw, vh } = L;
+    const W = CONFIG.imgW, H = CONFIG.imgH, R = CONFIG.robot;
+    stage.classList.remove("no-head", "compact");
+
+    if (L.mode === "wide") {
+      const s = Math.min(Math.max(vw / W, vh / H), vw / CONFIG.fitWidth);
+      L.sStart = L.sMid = L.sEnd = s;
+      L.cyStart = L.cyMid = vh / 2;
+
+      // The title column stops short of the head.
+      const robotLeft = vw / 2 - (W / 2 - R.x0) * s;
+      stage.style.setProperty("--hero-w", Math.round(clamp(robotLeft - hero.offsetLeft - 40, 220, 520)) + "px");
+      const gap = Math.min(...CONFIG.partX.slice(1).map((x, i) => x - CONFIG.partX[i]));
+      stage.style.setProperty("--label-w", Math.round(Math.min(240, gap * s * 0.92)) + "px");
+
+      const fit = () => {
+        const labelH = Math.max(...parts.map((p) => p.offsetHeight));
+        const cyEnd = Math.min(vh / 2, vh - 20 - labelH - 12 - (CONFIG.partBottom - H / 2) * s);
+        return { cyEnd, partsTop: cyEnd - (H / 2 - CONFIG.partTop) * s };
+      };
+      let f = fit();
+      if (f.partsTop < 8) { stage.classList.add("compact"); f = fit(); }
+      if (f.partsTop < head.offsetTop + head.offsetHeight + 12) stage.classList.add("no-head");
+      L.cyEnd = f.cyEnd;
+    } else {
+      const sEnd = vw / CONFIG.camera.span[CONFIG.camera.span.length - 1];
+      const top = hero.offsetTop + hero.offsetHeight + 20;
+      const avail = Math.max(120, vh - top - 76);
+      const sStart = Math.max(sEnd, Math.min(avail / (R.y1 - R.y0), (vw * 0.62) / (R.x1 - R.x0)));
+      L.sStart = sStart;
+      L.sMid = Math.max(sStart, Math.min(vh / H, (vw * 0.8) / (R.x1 - R.x0)));
+      L.sEnd = sEnd;
+      L.cyStart = top + (H / 2 - R.y0) * sStart;
+      L.cyMid = vh / 2;
+
+      const headTop = head.offsetTop;
+      const fit = () => {
+        const above = stage.classList.contains("no-head") ? headTop : head.offsetTop + head.offsetHeight + 22;
+        const cyEnd = above + (H / 2 - CONFIG.partTop) * sEnd;
+        const listTop = cyEnd + (CONFIG.partBottom + 26 - H / 2) * sEnd + 22;
+        return { cyEnd, bottom: listTop + list.offsetHeight };
+      };
+      let f = fit();
+      if (f.bottom > vh - 12) { stage.classList.add("no-head"); f = fit(); }
+      if (f.bottom > vh - 12) { stage.classList.add("compact"); f = fit(); }
+      L.cyEnd = f.cyEnd;
+    }
+    invalidate();
+  }
+
+  function camera() {
+    if (L.mode === "wide") {
+      return { s: L.sStart, cx: L.vw / 2, cy: lerp(L.cyStart, L.cyEnd, state.lift) };
+    }
+    // Narrow: push in while the title leaves, then pull back and pan so the action always fits the width.
+    const s1 = L.sStart * Math.pow(L.sMid / L.sStart, state.settle);
+    const s = Math.min(s1, L.vw / track(CONFIG.camera.span, state.frame));
+    const cx = L.vw / 2 - (track(CONFIG.camera.center, state.frame) - CONFIG.imgW / 2) * s;
+    const cy = lerp(lerp(L.cyStart, L.cyMid, state.settle), L.cyEnd, state.lift);
+    return { s, cx, cy };
+  }
+
+  let shown = -1;
+  function render() {
+    if (!L.vw || (L.mode !== "wide" && L.mode !== "narrow")) return;
+    const g = camera();
+    const w = CONFIG.imgW * g.s, h = CONFIG.imgH * g.s;
+    const x = g.cx - w / 2, y = g.cy - h / 2;
+
+    const grad = ctx.createLinearGradient(0, 0, 0, L.vh);
+    BG.forEach((c) => grad.addColorStop(c[3], "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")"));
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, L.vw, L.vh);
+
+    const idx = Math.round(state.frame);
+    const img = frameImage(idx);
+    if (img) {
+      ctx.drawImage(img, x, y, w, h);
+      feather(y, h);
+    }
+    if (idx !== shown) {
+      shown = idx;
+      hudCount.textContent = pad3(idx + 1) + " / " + pad3(CONFIG.frameCount);
+    }
+    place(g);
+  }
+
+  // Where the frame stops short of the viewport, fade it into the page background.
+  function feather(y, h) {
+    const f = Math.min(90, h * 0.12);
+    if (y > 0.5) {
+      const c = bgAt(y).join(",");
+      const g = ctx.createLinearGradient(0, y, 0, y + f);
+      g.addColorStop(0, "rgba(" + c + ",1)"); g.addColorStop(1, "rgba(" + c + ",0)");
+      ctx.fillStyle = g; ctx.fillRect(0, y - 1, L.vw, f + 1);
+    }
+    if (y + h < L.vh - 0.5) {
+      const c = bgAt(y + h).join(",");
+      const g = ctx.createLinearGradient(0, y + h - f, 0, y + h);
+      g.addColorStop(0, "rgba(" + c + ",0)"); g.addColorStop(1, "rgba(" + c + ",1)");
+      ctx.fillStyle = g; ctx.fillRect(0, y + h - f, L.vw, f + 1);
+    }
+  }
+
+  // Labels and badges follow the same camera as the canvas.
+  function place(g) {
+    const X = (px) => g.cx + (px - CONFIG.imgW / 2) * g.s;
+    const Y = (py) => g.cy + (py - CONFIG.imgH / 2) * g.s;
+    if (L.mode === "wide") {
+      const top = (Y(CONFIG.partBottom) + 12).toFixed(1);
+      parts.forEach((p, i) => { p.style.transform = "translate3d(" + X(CONFIG.partX[i]).toFixed(1) + "px," + top + "px,0)"; });
+    } else {
+      const my = Y(CONFIG.partBottom + 26);
+      markers.forEach((m, i) => { m.style.left = X(CONFIG.partX[i]).toFixed(1) + "px"; m.style.top = my.toFixed(1) + "px"; });
+      list.style.transform = "translate3d(0," + (my + 22).toFixed(1) + "px,0)";
+    }
+  }
+
+  // One draw per animation frame, only when something changed.
+  gsap.ticker.add(() => { if (dirty) { dirty = false; render(); } });
+
+  /* ---------------- Presentation mode ---------------- */
+  // Arrow keys, Page Up/Down, Space and most clickers step through the talk's beats. F toggles fullscreen.
+  let smoother = null;
+  let beats = () => [];
+  let target = null;
+
+  const currentY = () => (smoother ? smoother.scrollTop() : window.scrollY);
+
+  function go(y) {
+    target = y;
+    const duration = clamp((Math.abs(y - currentY()) / window.innerHeight) * 0.6, 0.5, 3.2);
+    const done = () => { target = null; };
+    if (smoother) gsap.to(smoother, { scrollTop: y, duration, ease: "power2.inOut", overwrite: true, onComplete: done });
+    else if (hasScrollTo) gsap.to(window, { scrollTo: { y, autoKill: false }, duration, ease: "power2.inOut", overwrite: true, onComplete: done });
+    else { window.scrollTo({ top: y, behavior: "smooth" }); done(); }
+  }
+
+  function step(dir) {
+    const list = beats();
+    if (!list.length) return;
+    const y = target === null ? currentY() : target;
+    let i;
+    if (dir === -Infinity) i = 0;
+    else if (dir === Infinity) i = list.length - 1;
+    else if (dir > 0) { i = list.findIndex((p) => p > y + 4); if (i < 0) i = list.length - 1; }
+    else { i = 0; for (let k = list.length - 1; k >= 0; k--) { if (list[k] < y - 4) { i = k; break; } } }
+    go(list[i]);
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) { if (root.requestFullscreen) root.requestFullscreen().catch(() => {}); }
+    else if (document.exitFullscreen) document.exitFullscreen();
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (!revealed || e.altKey || e.ctrlKey || e.metaKey) return;
+    const t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(t.tagName))) return;
+    if (e.key === "f" || e.key === "F") { toggleFullscreen(); return; }
+    let dir = 0;
+    if (e.key === " ") dir = e.shiftKey ? -1 : 1;
+    else if (["ArrowRight", "ArrowDown", "PageDown", "Enter"].includes(e.key)) dir = 1;
+    else if (["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) dir = -1;
+    else if (e.key === "Home") dir = -Infinity;
+    else if (e.key === "End") dir = Infinity;
+    if (!dir) return;
+    e.preventDefault();
+    step(dir);
+  });
+
+  /* ---------------- Timelines ---------------- */
+  let intro = null;
+  let initDone = false;
+  let started = false;
+  let revealed = false;
+
+  function begin() {
+    started = true;
+    clearTimeout(skipTimer);
+    if (initDone) reveal();
+  }
+
+  function reveal() {
+    if (revealed) return;
+    revealed = true;
+    gsap.to(loader, { autoAlpha: 0, duration: 0.7, ease: "power2.out" });
+    body.classList.remove("is-locked");
+    if (smoother) smoother.paused(false);
+    ScrollTrigger.refresh();
+    if (intro) intro.play();
+    invalidate();
+  }
+
+  function init() {
+    const mm = gsap.matchMedia();
+
+    mm.add({ wide: WIDE, narrow: NARROW, fine: FINE }, (context) => {
+      const { wide, fine } = context.conditions;
+      L.mode = wide ? "wide" : "narrow";
+      stage.dataset.layout = L.mode;
+      parts.forEach((p) => { p.style.transform = ""; });
+      list.style.transform = "";
+      cueLabel.textContent = fine ? "Scroll or press →" : "Scroll";
+
+      // Inertial scrolling on desktop mice and trackpads; touch keeps native scrolling.
+      // Created before any ScrollTrigger, as ScrollSmoother requires.
+      if (hasSmoother && wide && fine) {
+        smoother = ScrollSmoother.create({ wrapper: "#smooth-wrapper", content: "#smooth-content", smooth: 1.1, smoothTouch: false, effects: false });
+        if (!revealed) smoother.paused(true);
+      }
+
+      const splits = [];
+      const split = (el, type) => {
+        if (!hasSplit) return null;
+        const s = SplitText.create(el, type === "chars" ? { type: "words,chars", mask: "words" } : { type: "words", mask: "words" });
+        splits.push(s);
+        return s;
+      };
+      // Words rise out of a mask; without SplitText the whole line fades up instead.
+      const rise = (tl, el, at, stagger, duration) => {
+        const s = split(el);
+        if (s) tl.from(s.words, { yPercent: 110, duration, stagger, ease: "expo.out" }, at);
+        else tl.fromTo(el, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration, ease: "expo.out" }, at);
+      };
+
+      // Intro: plays once when the frames are ready.
+      const introTl = gsap.timeline({ paused: true, defaults: { ease: "expo.out" } });
+      introTl.from("#hero .eyebrow", { autoAlpha: 0, y: 12, duration: 0.9 }, 0);
+      rise(introTl, $("#hero-title"), 0.08, 0.045, 1.2);
+      introTl.from("#hero .hero-note", { autoAlpha: 0, y: 12, duration: 0.9 }, 0.5)
+             .from(".cue-inner", { autoAlpha: 0, y: 10, duration: 0.9 }, 0.75);
+      if (revealed) introTl.progress(1);
+      intro = introTl;
+
+      measure();
+
+      /* --- Robot scene: one scrubbed timeline; units are arbitrary, ScrollTrigger maps them onto the pin --- */
+      const SEQ = 24;
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: "#sequence",
+          start: "top top",
+          end: () => "+=" + Math.round(window.innerHeight * CONFIG.scrollLength),
+          pin: stage,
+          scrub: 0.8,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onRefresh: measure,
+        },
+      });
+
+      tl.addLabel("title", 0)
+        .to(state, { frame: LAST, duration: SEQ, onUpdate: invalidate }, 0)
+        .to(hudFill, { scaleX: 1, duration: SEQ }, 0)
+        .to(cue, { autoAlpha: 0, duration: 0.5 }, 0)
+        .to(hero, { autoAlpha: 0, y: () => -0.06 * L.vh, duration: 2.0, ease: "power2.in" }, 0.15)
+        .fromTo(hud, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8 }, 0.6);
+      if (!wide) tl.to(state, { settle: 1, duration: 2.6, ease: "power1.inOut", onUpdate: invalidate }, 0.9);
+
+      tl.addLabel("contents", SEQ - 0.3)
+        .to(hud, { autoAlpha: 0, duration: 0.5 }, "contents")
+        .to(state, { lift: 1, duration: 1.4, ease: "power2.inOut", onUpdate: invalidate }, "contents")
+        .fromTo("#contents-head .eyebrow", { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" }, "contents+=0.6");
+      rise(tl, $("#contents-title"), "contents+=0.7", 0.08, 0.9);
+      tl.addLabel("contents-shown", "contents+=1.6");
+
+      parts.forEach((p, i) => {
+        const at = 1.8 + i * 0.85;
+        const pos = (d) => "contents+=" + (at + d).toFixed(2);
+        const line = p.querySelector(".part-line");
+        tl.fromTo(line, wide ? { scaleY: 0 } : { scaleX: 0 }, wide ? { scaleY: 1, duration: 0.5, ease: "power3.inOut" } : { scaleX: 1, duration: 0.6, ease: "power3.inOut" }, pos(0))
+          .fromTo(p.querySelector(".num"), { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" }, pos(0.15));
+        rise(tl, p.querySelector("h3"), pos(0.2), 0.05, 0.9);
+        tl.fromTo(p.querySelectorAll("li"), { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.08, ease: "power3.out" }, pos(0.45));
+        if (!wide) tl.fromTo(markers[i], { autoAlpha: 0, scale: 0.4 }, { autoAlpha: 1, scale: 1, duration: 0.5, ease: "back.out(2.2)" }, pos(0));
+        tl.addLabel("part-" + i, pos(1.05));
+      });
+      tl.to({}, { duration: 1.0 }); // a beat on the finished contents before the page moves on
+
+      /* --- Closing scene: presenters on a diagonal, "Thank you." fills in --- */
+      const [A, B] = people.map((p) => ({
+        el: p,
+        avatar: p.querySelector(".avatar"),
+        orbit: p.querySelector(".orbit ellipse"),
+        clip: p.querySelector(".avatar-clip"),
+        media: p.querySelector(".avatar-media"),
+        name: p.querySelector(".person-name"),
+      }));
+      const drift = () => window.innerWidth * (wide ? 0.06 : 0.03);
+      const ctl = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: credits,
+          start: "top top",
+          end: () => "+=" + Math.round(window.innerHeight * CONFIG.creditsLength[wide ? 0 : 1]),
+          pin: true,
+          scrub: 0.8,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+      ctl.fromTo(A.el, { y: 36 }, { y: -36, duration: 2.8 }, 0)
+         .fromTo(B.el, { y: -36 }, { y: 36, duration: 2.8 }, 0)
+         .fromTo(words[0], { x: drift }, { x: 0, duration: 2.8, ease: "power1.out" }, 0)
+         .fromTo(words[1], { x: () => -drift() }, { x: 0, duration: 2.8, ease: "power1.out" }, 0)
+         .fromTo(".credits-eyebrow", { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0);
+      [A, B].forEach((P, i) => {
+        const at = 0.05 + i * 0.5;
+        ctl.fromTo(P.orbit, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, at)
+           .fromTo(P.clip, { clipPath: i === 0 ? "inset(100% 0% 0% 0%)" : "inset(0% 0% 100% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.7, ease: "power3.out" }, at + 0.05)
+           .fromTo(P.media, { scale: 1.3 }, { scale: 1, duration: 1.0, ease: "power3.out" }, at + 0.05);
+        const s = split(P.name, "chars");
+        if (s) ctl.from(s.chars, { yPercent: 110, rotate: 6, duration: 0.6, stagger: 0.025, ease: "power3.out" }, at + 0.25);
+        else ctl.fromTo(P.name, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" }, at + 0.25);
+      });
+      ctl.addLabel("people", 1.5)
+         .fromTo(words[0], { backgroundPosition: "100% 0%" }, { backgroundPosition: "0% 0%", duration: 0.6, ease: "power1.inOut" }, 1.55)
+         .fromTo(words[1], { backgroundPosition: "100% 0%" }, { backgroundPosition: "0% 0%", duration: 0.6, ease: "power1.inOut" }, 1.95)
+         .to({}, { duration: 0.25 }, 2.55);
+
+      // Desktop: the ovals lean toward the cursor.
+      let offTilt = null;
+      if (fine) {
+        const tilts = [A, B].map((P) => {
+          gsap.set(P.avatar, { transformPerspective: 900 });
+          return {
+            box: P.avatar,
+            rx: gsap.quickTo(P.avatar, "rotationX", { duration: 0.8, ease: "power3" }),
+            ry: gsap.quickTo(P.avatar, "rotationY", { duration: 0.8, ease: "power3" }),
+          };
+        });
+        const onMove = (e) => tilts.forEach((t) => {
+          const r = t.box.getBoundingClientRect();
+          t.ry(clamp((e.clientX - (r.left + r.width / 2)) / window.innerWidth, -0.5, 0.5) * 16);
+          t.rx(clamp((e.clientY - (r.top + r.height / 2)) / window.innerHeight, -0.5, 0.5) * -16);
+        });
+        const onLeave = () => tilts.forEach((t) => { t.rx(0); t.ry(0); });
+        credits.addEventListener("pointermove", onMove);
+        credits.addEventListener("pointerleave", onLeave);
+        offTilt = () => { credits.removeEventListener("pointermove", onMove); credits.removeEventListener("pointerleave", onLeave); };
+      }
+
+      // Beats for presentation mode, read from the timelines so they follow any resize.
+      const posOf = (timeline, label) => {
+        const st = timeline.scrollTrigger;
+        return Math.round(st.start + (st.end - st.start) * (timeline.labels[label] / timeline.duration()));
+      };
+      beats = () => [
+        0,
+        posOf(tl, "contents-shown"),
+        ...parts.map((p, i) => posOf(tl, "part-" + i)),
+        posOf(ctl, "people"),
+        Math.round(ctl.scrollTrigger.end),
+      ];
+
+      return () => {
+        if (offTilt) offTilt();
+        splits.forEach((s) => s.revert());
+        stage.classList.remove("no-head", "compact");
+        if (smoother) { smoother.kill(); smoother = null; }
+        beats = () => [];
+      };
+    });
+
+    window.addEventListener("resize", measure);
+    initDone = true;
+    if (started) reveal();
+  }
+
+  // Split text only after the web font is in, so word widths are final.
+  const fontsReady = document.fonts && document.fonts.ready
+    ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))])
+    : Promise.resolve();
+  fontsReady.then(init);
+})();
+</script>
+</body>
+</html>
