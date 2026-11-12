@@ -60,10 +60,9 @@
   --sb: env(safe-area-inset-bottom, 0px);
   --fs-label: clamp(11px, .76vw, 15px);   /* eyebrows, counters, hints */
   color-scheme: light;
-  scrollbar-gutter: stable;     /* no sideways jump when scrolling is unlocked */
-  scrollbar-color: #8e9698 var(--studio);
+  scrollbar-width: none;        /* a presentation: no scrollbar; the page still scrolls as usual */
 }
-:root:fullscreen { scrollbar-width: none; }   /* presenting: nothing but the stage */
+:root::-webkit-scrollbar { display: none; }
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
