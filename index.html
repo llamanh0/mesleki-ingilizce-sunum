@@ -221,6 +221,99 @@ body.is-locked { overflow: hidden; }
 }
 .loader.is-visible { opacity: 1; }   /* only shows up on slow connections */
 
+/* ---------- Slides ----------
+   Written as an ordinary page first (that is what shows without scripts); ".is-live" turns it into a pinned deck
+   where one slide at a time sits next to the figure drawn by scene.js. */
+.deck { position: relative; background: var(--studio-low); }
+.deck canvas, .deck-hud { display: none; }
+.slide { padding: clamp(40px, 8vh, 96px) var(--gr) clamp(40px, 8vh, 96px) var(--gl); }
+.slide-body { max-width: 760px; }
+.chapter { margin: 0 0 1.1em; font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.chapter .num { margin-right: .9em; color: var(--copper); }
+.slide h2 { margin: 0; font-size: clamp(30px, min(4vw, 7.4vh), 76px); font-weight: 600; letter-spacing: -.035em; line-height: 1.05; text-wrap: balance; }
+.lead { margin: 1em 0 0; max-width: 33em; font-size: clamp(16px, min(1.5vw, 2.9vh), 28px); line-height: 1.4; color: var(--ink-2); text-wrap: pretty; }
+.points { list-style: none; margin: 1.5em 0 0; padding: 0; display: grid; gap: .72em; font-size: clamp(15px, min(1.3vw, 2.5vh), 24px); line-height: 1.36; }
+.points li { position: relative; padding-left: 1.25em; text-wrap: pretty; }
+.points li::before { content: ""; position: absolute; left: 0; top: calc(.68em - 1px); width: .55em; height: 2px; border-radius: 1px; background: var(--copper); }
+.points b, .timeline b { font-weight: 600; }
+.points.steps { counter-reset: step; }
+.points.steps li { counter-increment: step; padding-left: 2.1em; }
+.points.steps li::before { content: counter(step, decimal-leading-zero); top: .2em; width: auto; height: auto; background: none; font-family: var(--font-mono); font-size: .68em; font-weight: 500; color: var(--copper); }
+.note { margin: 1.5em 0 0; padding-top: 1em; border-top: 1px solid var(--rule); max-width: 36em; font-size: clamp(14px, min(1.1vw, 2.2vh), 20px); line-height: 1.4; color: var(--ink-2); }
+.timeline { list-style: none; margin: 1.5em 0 0; padding: 0; display: grid; gap: .62em; font-size: clamp(15px, min(1.3vw, 2.5vh), 24px); line-height: 1.34; }
+.timeline li { display: grid; grid-template-columns: 3.4em minmax(0, 1fr); column-gap: .8em; align-items: baseline; }
+.timeline .year { font-family: var(--font-mono); font-size: .8em; font-weight: 500; color: var(--copper); }
+.cols { margin: 1.5em 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(18px, 2.6vw, 48px); }
+.cols h3, .prompt h3 { margin: 0 0 .9em; font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--copper); }
+.cols .points { margin: 0; }
+.prompts { margin: 1.5em 0 0; display: grid; gap: clamp(10px, 1.6vh, 18px); }
+.prompt { padding: clamp(12px, 1.9vh, 20px) clamp(14px, 1.4vw, 24px); border: 1px solid var(--rule); border-radius: 10px; background: rgba(240, 242, 242, .5); }
+.prompt h3 { margin-bottom: .6em; color: var(--ink-2); }
+.prompt.is-better { border-color: rgba(122, 68, 38, .55); }
+.prompt.is-better h3 { color: var(--copper); }
+.prompt p { margin: 0; font-family: var(--font-mono); font-size: clamp(13px, min(1.05vw, 2.1vh), 19px); line-height: 1.5; }
+
+.deck.is-live {
+  height: 100vh; height: 100lvh; overflow: hidden;
+  background: radial-gradient(70% 60% at 72% 46%, #dfe2e3 0%, var(--studio-low) 62%);
+}
+.deck.is-live[data-layout="narrow"] { background: radial-gradient(90% 34% at 50% 24%, #dfe2e3 0%, var(--studio-low) 62%); }
+.deck.is-live canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.deck.is-live .deck-ui { position: absolute; left: 0; right: 0; top: 0; height: 100vh; height: 100svh; }
+.deck.is-live .slide {
+  position: absolute; inset: 0;
+  display: flex; align-items: center;
+  padding: calc(var(--st) + clamp(20px, 5vh, 64px)) var(--gr) calc(var(--sb) + clamp(48px, 9vh, 92px)) var(--gl);
+}
+.deck.is-live .slide-body { width: min(47%, 760px); max-width: none; }
+.deck.is-live[data-layout="narrow"] .slide { align-items: flex-end; }
+.deck.is-live[data-layout="narrow"] .slide-body { width: 100%; }
+.deck[data-layout="narrow"] .slide h2 { font-size: clamp(25px, 6.6vw, 46px); }
+.deck[data-layout="narrow"] .lead { font-size: clamp(15px, 3.4vw, 22px); }
+.deck[data-layout="narrow"] :is(.points, .timeline) { font-size: clamp(14px, 3.1vw, 20px); gap: .5em; }
+.deck[data-layout="narrow"] :is(.lead, .points, .timeline, .cols, .prompts, .note) { margin-top: 1em; }
+.deck[data-layout="narrow"] .note { padding-top: .8em; font-size: clamp(13px, 2.8vw, 18px); }
+.deck[data-layout="narrow"] .prompt p { font-size: clamp(12px, 2.9vw, 17px); }
+@media (max-height: 540px) and (min-aspect-ratio: 6/5) {      /* a phone on its side */
+  .deck.is-live .slide { padding-top: calc(var(--st) + 12px); padding-bottom: calc(var(--sb) + 34px); }
+  .deck.is-live .slide-body { width: 52%; }
+  .deck .chapter { margin-bottom: .7em; }
+  .deck .slide h2 { font-size: clamp(19px, 6.6vh, 34px); }
+  .deck .lead { font-size: clamp(12px, 3.5vh, 16px); line-height: 1.32; }
+  .deck :is(.points, .timeline) { font-size: clamp(11.5px, 3.3vh, 15px); gap: .34em; line-height: 1.3; }
+  .deck :is(.lead, .points, .timeline, .cols, .prompts, .note) { margin-top: .7em; }
+  .deck .note { padding-top: .6em; font-size: 11px; }
+  .deck .prompt { padding: 7px 10px; }
+  .deck .prompt h3 { margin-bottom: .3em; }
+  .deck .prompt p { font-size: 11px; line-height: 1.4; }
+  .deck .prompts { gap: 6px; }
+  .deck.is-live .deck-hud { bottom: calc(var(--sb) + 10px); }
+}
+.deck.is-live .deck-hud {
+  position: absolute; left: var(--gl); right: var(--gr); bottom: calc(var(--sb) + clamp(14px, 2.6vh, 28px));
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--font-mono); font-size: clamp(10px, .7vw, 13px); letter-spacing: .12em; color: var(--ink-2);
+  font-variant-numeric: tabular-nums; pointer-events: none;
+}
+.deck-hud .hud-track { margin-right: auto; }
+
+/* ---------- Full screen ---------- */
+.fs-btn {
+  position: fixed; z-index: 20; top: calc(var(--st) + clamp(12px, 2vh, 22px)); right: calc(var(--gr) * .5 + 6px);
+  width: 40px; height: 40px; padding: 0; display: none; place-items: center;
+  border: 1px solid var(--rule); border-radius: 10px; background: rgba(227, 230, 230, .6); color: var(--ink);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  cursor: pointer; opacity: .7; transition: opacity .25s ease, background-color .25s ease;
+}
+.js .fs-btn.is-ready { display: grid; }
+.fs-btn:hover, .fs-btn:focus-visible { opacity: 1; background: rgba(240, 242, 242, .9); }
+.fs-btn:focus-visible { outline: 2px solid var(--copper); outline-offset: 2px; }
+.fs-btn svg { width: 18px; height: 18px; display: block; }
+.fs-btn .icon-exit, :root:fullscreen .fs-btn .icon-enter { display: none; }
+:root:fullscreen .fs-btn .icon-exit { display: block; }
+:root:fullscreen.is-resting { cursor: none; }                 /* presenting: pointer and button step aside when idle */
+:root:fullscreen.is-resting .fs-btn { opacity: 0; }
+
 /* ---------- Presenters ---------- */
 .credits {
   position: relative;
@@ -339,6 +432,184 @@ body.is-locked { overflow: hidden; }
         </div>
       </section>
 
+      <section class="deck" id="deck" aria-label="Slides">
+        <canvas id="figure" aria-hidden="true"></canvas>
+        <div class="deck-ui" id="deck-ui">
+          <article class="slide" data-figure="globe">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">01</span>Introduction</p>
+              <h2>AI is already part of the day</h2>
+              <p class="lead">From unlocking a phone to finding the fastest way home, most of us rely on AI long before we stop to think about it.</p>
+              <ul class="points">
+                <li>It works quietly inside the tools we already use.</li>
+                <li>For computer engineers, it is both a subject to understand and a tool to build with.</li>
+                <li>Today: what it is, where we meet it, and how to use it well.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="slide" data-figure="network">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">02</span>Understanding AI</p>
+              <h2>What is AI?</h2>
+              <p class="lead">Software that performs tasks we normally associate with human intelligence: recognising patterns, understanding language, making decisions.</p>
+              <ul class="points">
+                <li><b>Machine learning</b> learns from data instead of following hand-written rules.</li>
+                <li><b>Deep learning</b> uses neural networks with many layers.</li>
+                <li><b>Generative AI</b> produces new text, images and code.</li>
+              </ul>
+              <p class="note">Today’s AI is narrow: excellent at specific tasks, not a general mind.</p>
+            </div>
+          </article>
+
+          <article class="slide" data-figure="helix">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">02</span>Understanding AI</p>
+              <h2>A brief history of AI</h2>
+              <ol class="timeline">
+                <li><span class="year">1950</span><span>Alan Turing asks, “Can machines think?”</span></li>
+                <li><span class="year">1956</span><span>The Dartmouth workshop gives the field its name.</span></li>
+                <li><span class="year">1997</span><span>Deep Blue defeats chess world champion Garry Kasparov.</span></li>
+                <li><span class="year">2012</span><span>AlexNet wins ImageNet, and deep learning takes off.</span></li>
+                <li><span class="year">2017</span><span>“Attention Is All You Need” introduces the Transformer.</span></li>
+                <li><span class="year">2022</span><span>ChatGPT puts large language models in everyone’s hands.</span></li>
+              </ol>
+            </div>
+          </article>
+
+          <article class="slide" data-figure="phone">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">03</span>AI in Daily Life</p>
+              <h2>Everyday examples</h2>
+              <p class="lead">Most of the AI we use never calls itself AI.</p>
+              <ul class="points">
+                <li><b>Recommendations:</b> what to watch, listen to or buy next.</li>
+                <li><b>Navigation:</b> live traffic and arrival times.</li>
+                <li><b>Communication:</b> spam filters, autocorrect, translation.</li>
+                <li><b>Phones:</b> face unlock, voice assistants, sharper photos.</li>
+                <li><b>Banking:</b> fraud checks on every card payment.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="slide" data-figure="scale">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">03</span>AI in Daily Life</p>
+              <h2>Benefits and risks</h2>
+              <div class="cols">
+                <div>
+                  <h3>Benefits</h3>
+                  <ul class="points">
+                    <li>Saves time on repetitive work.</li>
+                    <li>Finds patterns people miss.</li>
+                    <li>Makes knowledge and tools easier to reach.</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3>Risks</h3>
+                  <ul class="points">
+                    <li>Bias inherited from its training data.</li>
+                    <li>Confident answers that are wrong.</li>
+                    <li>Lost privacy, and relying on it too much.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide" data-figure="orbit">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">04</span>AI in Our Field</p>
+              <h2>AI tools and use cases</h2>
+              <p class="lead">For software engineers, AI has become part of the toolbox.</p>
+              <ul class="points">
+                <li><b>Writing code:</b> assistants such as GitHub Copilot, Cursor and Claude Code.</li>
+                <li><b>Debugging and review:</b> explaining errors, spotting bugs, suggesting fixes.</li>
+                <li><b>Tests and documentation:</b> the work that often gets skipped.</li>
+                <li><b>Learning:</b> unfamiliar code, libraries and concepts, explained.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="slide" data-figure="transformer">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">04</span>AI in Our Field</p>
+              <h2>How LLMs work</h2>
+              <p class="lead">A large language model does one thing: it predicts the next token, again and again.</p>
+              <ol class="points steps">
+                <li><b>Tokenise:</b> the text is split into tokens, small pieces of words.</li>
+                <li><b>Embed:</b> each token becomes a list of numbers.</li>
+                <li><b>Attend:</b> transformer layers weigh how the tokens relate to each other.</li>
+                <li><b>Predict:</b> the model scores every possible next token and picks one.</li>
+              </ol>
+            </div>
+          </article>
+
+          <article class="slide" data-figure="compare">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">04</span>AI in Our Field</p>
+              <h2>Basic vs. technical prompts</h2>
+              <div class="prompts">
+                <div class="prompt">
+                  <h3>Basic</h3>
+                  <p>Write a sort function.</p>
+                </div>
+                <div class="prompt is-better">
+                  <h3>Technical</h3>
+                  <p>You are reviewing Python 3.12 code. Write a stable merge sort for a list of dicts, sorted by "date". Add type hints and two unit tests. Return only the code.</p>
+                </div>
+              </div>
+              <p class="note">Role · Context · Task · Constraints · Output format</p>
+            </div>
+          </article>
+
+          <article class="slide" data-figure="bars">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">04</span>AI in Our Field</p>
+              <h2>Token efficiency and accuracy</h2>
+              <p class="lead">Tokens are the unit of cost, speed and memory. One token is roughly four characters of English.</p>
+              <ul class="points">
+                <li>Give the model what is relevant, not everything you have.</li>
+                <li>Structure beats length: clear sections, examples, the format you expect.</li>
+                <li>Break large tasks into smaller steps.</li>
+                <li>Check the result: run the tests, read the sources.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="slide" data-figure="shield">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">05</span>Conclusion</p>
+              <h2>Using AI responsibly</h2>
+              <ul class="points">
+                <li><b>Verify:</b> treat every answer as a draft, not a fact.</li>
+                <li><b>Protect data:</b> no passwords, keys or personal data in a prompt.</li>
+                <li><b>Be transparent:</b> say when AI helped, and follow the rules of your course or company.</li>
+                <li><b>Stay the engineer:</b> you are responsible for the code you ship.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="slide" data-figure="gem">
+            <div class="slide-body">
+              <p class="chapter"><span class="num">05</span>Conclusion</p>
+              <h2>Key takeaways</h2>
+              <ul class="points">
+                <li>AI is already part of everyday life.</li>
+                <li>LLMs predict tokens; they do not know things.</li>
+                <li>Better prompts lead to better results.</li>
+                <li>It is a tool: powerful when used with judgement.</li>
+              </ul>
+            </div>
+          </article>
+
+          <div class="deck-hud" id="deck-hud" aria-hidden="true">
+            <span id="deck-count">01 / 11</span>
+            <span class="hud-track"><span class="hud-fill" id="deck-fill"></span></span>
+          </div>
+        </div>
+      </section>
+
       <section class="credits" id="credits" aria-labelledby="credits-title">
         <div class="credits-inner">
           <p class="eyebrow" id="credits-title">Presented by</p>
@@ -354,11 +625,18 @@ body.is-locked { overflow: hidden; }
   </div>
 </div>
 
+<button class="fs-btn" id="fs-btn" type="button" aria-label="Full screen" title="Full screen (F)">
+  <svg class="icon-enter" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6.5V2h4.5M11.5 2H16v4.5M16 11.5V16h-4.5M6.5 16H2v-4.5"/></svg>
+  <svg class="icon-exit" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 2v4.5H2M16 6.5h-4.5V2M11.5 16v-4.5H16M2 11.5h4.5V16"/></svg>
+</button>
+
 <script src="vendor/gsap/gsap.min.js"></script>
 <script src="vendor/gsap/ScrollTrigger.min.js"></script>
 <script src="vendor/gsap/ScrollSmoother.min.js"></script>
 <script src="vendor/gsap/ScrollToPlugin.min.js"></script>
 <script src="vendor/gsap/SplitText.min.js"></script>
+<script src="vendor/three/three.min.js"></script>
+<script src="scene.js"></script>
 <script>
 (function () {
   "use strict";
@@ -412,6 +690,12 @@ body.is-locked { overflow: hidden; }
   const loader = $("#loader");
   const credits = $("#credits");
   const safe = $("#safe");
+  const deck = $("#deck");
+  const deckUi = $("#deck-ui");
+  const slides = $$(".slide", deck);
+  const deckCount = $("#deck-count");
+  const deckFill = $("#deck-fill");
+  const fsBtn = $("#fs-btn");
 
   const N = CONFIG.frameCount;
   const LAST = N - 1;
@@ -423,6 +707,10 @@ body.is-locked { overflow: hidden; }
   const px = (v) => Math.round(v) + "px";
 
   function goStatic() {
+    if (deck) {                                // the slides become ordinary sections again
+      deck.classList.remove("is-live");
+      $$(".slide, .slide *", deck).forEach((el) => el.removeAttribute("style"));
+    }
     stage.dataset.layout = "static";
     body.classList.remove("is-locked");
   }
@@ -1020,18 +1308,24 @@ body.is-locked { overflow: hidden; }
   // Arrow keys, Page Up/Down, Space, Enter and most clickers step through the talk. F toggles fullscreen.
   let smoother = null;
   let mainTl = null;
+  let deckTl = null;
   let target = null;
   let goTween = null;
 
   const currentY = () => (smoother ? smoother.scrollTop() : window.scrollY);
 
+  // Scroll position of a label on a scrubbed, pinned timeline
+  const labelY = (tl, label) => {
+    const st = tl.scrollTrigger;
+    return Math.round(st.start + (st.end - st.start) * (tl.labels[label] / tl.duration()));
+  };
+
   function beats() {
     if (!mainTl || !mainTl.scrollTrigger) return [];
-    const st = mainTl.scrollTrigger;
-    const at = (label) => Math.round(st.start + (st.end - st.start) * (mainTl.labels[label] / mainTl.duration()));
     const out = [0];
-    if (!stage.classList.contains("no-head")) out.push(at("contents-shown"));
-    parts.forEach((p, i) => out.push(at("part-" + i)));
+    if (!stage.classList.contains("no-head")) out.push(labelY(mainTl, "contents-shown"));
+    parts.forEach((p, i) => out.push(labelY(mainTl, "part-" + i)));
+    if (deckTl && deckTl.scrollTrigger) slides.forEach((s, i) => out.push(labelY(deckTl, "slide-" + i)));
     out.push(Math.round(ScrollTrigger.maxScroll(window)));
     return out;
   }
@@ -1047,7 +1341,9 @@ body.is-locked { overflow: hidden; }
     const from = currentY();
     const screens = Math.abs(y - from) / window.innerHeight;
     // Forward plays the scene at a watchable pace; going back is quicker.
-    const duration = y > from ? clamp(screens * 1.75, 0.6, 6.5) : clamp(screens * 0.7, 0.5, 2.5);
+    let duration = y > from ? clamp(screens * 1.75, 0.6, 6.5) : clamp(screens * 0.7, 0.5, 2.5);
+    const ds = deckTl && deckTl.scrollTrigger;
+    if (ds && Math.min(from, y) >= ds.start - 2 && Math.max(from, y) <= ds.end + 2 && screens < 1.5) duration = 1.1;   // slide to slide
     target = y;
     if (smoother) goTween = gsap.to(smoother, { scrollTop: y, duration: duration, ease: "power2.inOut", onComplete: stopGo });
     else if (hasScrollTo) goTween = gsap.to(window, { scrollTo: { y: y, autoKill: false }, duration: duration, ease: "power2.inOut", onComplete: stopGo });
@@ -1086,10 +1382,33 @@ body.is-locked { overflow: hidden; }
   document.addEventListener("webkitfullscreenchange", onFullscreen);
   window.addEventListener("resize", () => { if (isFullscreen()) refreshSoon.restart(true); });
 
+  // The same switch as a button. While presenting, the pointer and the button step aside after a moment of rest.
+  if (fsBtn && (root.requestFullscreen || root.webkitRequestFullscreen)) {
+    fsBtn.classList.add("is-ready");
+    fsBtn.addEventListener("click", () => { toggleFullscreen(); fsBtn.blur(); });
+    const label = () => {
+      const text = isFullscreen() ? "Exit full screen" : "Full screen";
+      fsBtn.setAttribute("aria-label", text);
+      fsBtn.title = text + " (F)";
+    };
+    document.addEventListener("fullscreenchange", label);
+    document.addEventListener("webkitfullscreenchange", label);
+    let rest = 0;
+    const stir = () => {
+      root.classList.remove("is-resting");
+      clearTimeout(rest);
+      rest = setTimeout(() => root.classList.add("is-resting"), 2600);
+    };
+    window.addEventListener("pointermove", stir, { passive: true });
+    window.addEventListener("pointerdown", stir, { passive: true });
+    stir();
+  }
+
   window.addEventListener("keydown", (e) => {
     if (!unlocked || e.altKey || e.ctrlKey || e.metaKey) return;
     const t = e.target;
-    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(t.tagName))) return;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    if (t && t.tagName === "BUTTON" && (e.key === " " || e.key === "Enter")) return;   // the key belongs to the button
     if (e.key === "f" || e.key === "F") { toggleFullscreen(); return; }
     let dir = 0;
     if (e.key === " " || e.key === "Spacebar") dir = e.shiftKey ? -1 : 1;
@@ -1184,19 +1503,29 @@ body.is-locked { overflow: hidden; }
     ctl.fromTo(".credits-rule", { scaleX: 0 }, { scaleX: 1, duration: 1, ease: "power3.inOut" }, 0.45)
        .fromTo(".thanks", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.8 }, 0.6);
 
-    // Every refresh (resize, rotation, fullscreen, late fonts) re-measures the layout. The pinned distance changes
+    buildDeck();
+
+    // Every refresh (resize, rotation, fullscreen, late fonts) re-measures the layout. The pinned distances change
     // with the window, so afterwards the page is put back at the same point of the talk.
+    const scenes = () => [mainTl, deckTl].filter(Boolean).map((t) => t.scrollTrigger);
     let keep = null;
     ScrollTrigger.addEventListener("refreshInit", () => {
-      const st = tl.scrollTrigger;
+      keep = null;
+      if (!unlocked) return;
       const y = currentY();
-      if (!unlocked || !(st.end > st.start) || y <= st.start + 1) keep = null;
-      else keep = y < st.end ? { at: (y - st.start) / (st.end - st.start) } : { past: y - st.end };
+      const all = scenes();
+      for (let i = all.length - 1; i >= 0; i--) {
+        const st = all[i];
+        if (!(st.end > st.start) || y <= st.start + 1) continue;
+        keep = y < st.end ? { scene: i, at: (y - st.start) / (st.end - st.start) } : { scene: i, past: y - st.end };
+        break;
+      }
     });
     ScrollTrigger.addEventListener("refresh", () => {
       measure();
+      measureDeck();
       if (!keep) return;
-      const st = tl.scrollTrigger;
+      const st = scenes()[keep.scene];
       const y = Math.round("at" in keep ? st.start + keep.at * (st.end - st.start) : st.end + keep.past);
       keep = null;
       if (Math.abs(y - currentY()) < 2) return;
@@ -1206,6 +1535,117 @@ body.is-locked { overflow: hidden; }
       const scrub = st.getTween();
       if (scrub) scrub.progress(1);         // no catching up: the picture is simply where it was
     });
+  }
+
+  /* ---------------- Slides ---------------- */
+  // One pinned section. A scrubbed timeline swaps the slides; its position also tells the figure which shape to form.
+  const deckState = { pos: 0, gather: 0 };
+  const pointer = { x: 0, y: 0 };
+  let figure = null;
+  const pad2 = (n) => String(n).padStart(2, "0");
+
+  function deckChanged() {
+    const last = Math.max(1, slides.length - 1);
+    if (figure) { figure.progress(deckState.pos); figure.gather(deckState.gather); }
+    deckCount.textContent = pad2(Math.round(deckState.pos) + 1) + " / " + pad2(slides.length);
+    deckFill.style.transform = "scaleX(" + (deckState.pos / last).toFixed(4) + ")";
+  }
+
+  function measureDeck() {
+    if (!deck.classList.contains("is-live")) return;
+    const w = deck.clientWidth;
+    const h = deck.clientHeight;
+    const uh = Math.min(h, deckUi.clientHeight || h);
+    if (!w || !h) return;
+    const wide = wideQuery.matches;
+    deck.dataset.layout = wide ? "wide" : "narrow";
+    if (!figure) return;
+    figure.resize(w, h, Math.min(window.devicePixelRatio || 1, 2));
+    const k = uh / h;                            // the text lives in the always-visible part of the section
+    if (wide) {
+      figure.place({ x: 0.735, y: 0.5 * k, w: 0.4, h: 0.74 * k });
+    } else {
+      // The figure takes the room above the longest slide.
+      const tallest = Math.max.apply(null, slides.map((s) => s.firstElementChild.offsetHeight));
+      const bottom = parseFloat(getComputedStyle(slides[0]).paddingBottom) || 0;
+      const room = Math.max(0, uh - bottom - tallest - 12);
+      const top = insets().top + 10;
+      const fits = room - top > uh * 0.16;
+      deck.querySelector("canvas").style.opacity = fits ? "" : "0.3";      // no room: it stays in the background
+      const zone = fits ? room - top : uh * 0.5;
+      figure.place({ x: 0.5, y: (top + zone / 2) / h, w: 0.86, h: (zone * 0.96) / h });
+    }
+  }
+
+  function buildDeck() {
+    if (!deck || !slides.length) return;
+    deck.classList.add("is-live");
+    deck.dataset.layout = wideQuery.matches ? "wide" : "narrow";
+    try {
+      if (window.Figures && window.THREE) {
+        figure = window.Figures.create($("#figure"), { figures: slides.map((s) => s.dataset.figure), count: FINE ? 15000 : 9000 });
+      }
+    } catch (e) { figure = null; }
+    if (!figure) $("#figure").style.display = "none";
+
+    // What moves when a slide arrives: its blocks, and the entries of its lists one by one
+    const units = slides.map((s) => {
+      const out = [];
+      $$(".slide-body > *", s).forEach((el) => {
+        const items = el.matches(".points, .timeline") ? $$("li", el) : el.matches(".cols, .prompts") ? Array.from(el.children) : [el];
+        items.forEach((item) => out.push(item));
+      });
+      return out;
+    });
+    const n = slides.length;
+
+    // Arriving: the figure gathers and the first slide fades up while the section scrolls into place.
+    gsap.timeline({ defaults: { ease: "none" }, scrollTrigger: { trigger: deck, start: "top 85%", end: "top top", scrub: 0.6 } })
+      .fromTo(deckState, { gather: 0 }, { gather: 1, duration: 1, onUpdate: deckChanged }, 0)
+      .fromTo(units[0], { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.45, stagger: { amount: 0.3 }, ease: "power2.out" }, 0.3);
+
+    // One unit of time per slide: it leaves at +0.18, the next one is complete before the following stop.
+    const dtl = gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: {
+        trigger: deck,
+        start: "top top",
+        end: () => "+=" + Math.round((deck.offsetHeight || window.innerHeight) * 0.85 * (n - 1 + 0.4)),
+        pin: true,
+        scrub: 0.6,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
+    });
+    deckTl = dtl;
+    dtl.to(deckState, { pos: n - 1, duration: n - 1, onUpdate: deckChanged }, 0);
+    slides.forEach((s, i) => {
+      dtl.addLabel("slide-" + i, i);
+      if (i > 0) {
+        gsap.set(s, { autoAlpha: 0 });
+        dtl.set(s, { autoAlpha: 1, y: 0 }, i - 0.52)
+           .fromTo(units[i], { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, stagger: { amount: 0.16 }, ease: "power2.out" }, i - 0.5);
+      }
+      if (i < n - 1) dtl.fromTo(s, { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -22, duration: 0.26, ease: "power1.in", immediateRender: false }, i + 0.18);
+    });
+    dtl.to({}, { duration: 0.4 }, n - 1);        // a beat on the last slide before the page moves on
+
+    // The figure is only drawn while the section is on screen.
+    if (figure) {
+      const seen = () => {
+        const st = dtl.scrollTrigger;
+        const y = currentY();
+        const h = window.innerHeight;
+        return y > st.start - h && y < st.end + h;
+      };
+      if (FINE) window.addEventListener("pointermove", (e) => {
+        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+      }, { passive: true });
+      gsap.ticker.add((time) => { if (seen()) figure.render(time, pointer); });
+    }
+    deckChanged();
+    measureDeck();
   }
 
   function maybeReveal() {
