@@ -6,28 +6,46 @@
 <title>AI in Everyday Life and Computer Engineering</title>
 <meta name="description" content="A scroll-driven presentation in five parts on AI in everyday life and computer engineering.">
 <meta name="theme-color" content="#c8cccd">
+<link rel="canonical" href="https://llamanh0.github.io/mesleki-ingilizce-sunum/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="AI in Everyday Life and Computer Engineering">
 <meta property="og:description" content="A scroll-driven presentation in five parts.">
-<meta property="og:url" content="https://mesleki-ingilizce-sunum.vercel.app/">
-<meta property="og:image" content="https://mesleki-ingilizce-sunum.vercel.app/og.jpg">
+<meta property="og:url" content="https://llamanh0.github.io/mesleki-ingilizce-sunum/">
+<meta property="og:image" content="https://llamanh0.github.io/mesleki-ingilizce-sunum/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="A robot head taken apart into five components">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preload" as="image" href="frames-webp/frame-001.webp" fetchpriority="high">
-<script>document.documentElement.className = "js";</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="preload" href="frames-webp/frame-001.webp" as="image" fetchpriority="high">
+<script>
+  // Mark the page as scripted; if the main script never boots (old browser, missing file), fall back to the plain page.
+  document.documentElement.className = "js";
+  // Fetch the fonts early. Not when the page is opened straight from disk: browsers refuse that kind of request there.
+  if (location.protocol !== "file:") {
+    ["fonts/geist-variable.woff2", "fonts/geist-mono-variable.woff2"].forEach(function (href) {
+      var link = document.createElement("link");
+      link.rel = "preload"; link.as = "font"; link.type = "font/woff2"; link.crossOrigin = "anonymous"; link.href = href;
+      document.head.appendChild(link);
+    });
+  }
+  window.addEventListener("load", function () {
+    if (window.__booted) return;
+    var stage = document.getElementById("stage");
+    if (stage) stage.setAttribute("data-layout", "static");
+    document.body.classList.remove("is-locked");
+  });
+</script>
 <style>
 /* Layout: one pinned, full-bleed canvas; text lives in the empty studio space around the robot.
-   The presenters follow on a plain, centred page. */
+   The presenters follow on a plain, centred page. Everything the page needs is served from this folder. */
+@font-face { font-family: "Geist"; src: url("fonts/geist-variable.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url("fonts/geist-mono-variable.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+
 :root {
   --studio-top: #c0c4c5;
   --studio: #c8cccd;
-  --studio-low: #d0d4d5;
+  --studio-low: #d0d4d5;        /* also the colour the canvas fades to under the parts */
   --paper: #e3e6e6;
   --ink: #101415;
   --ink-2: #364043;
@@ -36,12 +54,16 @@
   --copper: #7a4426;            /* the wiring inside the head */
   --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, Arial, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --gl: max(clamp(16px, 5vw, 80px), env(safe-area-inset-left, 0px));
-  --gr: max(clamp(16px, 5vw, 80px), env(safe-area-inset-right, 0px));
+  --gl: max(clamp(16px, 5vw, 96px), env(safe-area-inset-left, 0px));
+  --gr: max(clamp(16px, 5vw, 96px), env(safe-area-inset-right, 0px));
   --st: env(safe-area-inset-top, 0px);
   --sb: env(safe-area-inset-bottom, 0px);
+  --fs-label: clamp(11px, .76vw, 15px);   /* eyebrows, counters, hints */
   color-scheme: light;
+  scrollbar-gutter: stable;     /* no sideways jump when scrolling is unlocked */
+  scrollbar-color: #8e9698 var(--studio);
 }
+:root:fullscreen { scrollbar-width: none; }   /* presenting: nothing but the stage */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
@@ -57,78 +79,83 @@ body.is-locked { overflow: hidden; }
 .eyebrow {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 12px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+  font-size: var(--fs-label); font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
   color: var(--copper);
 }
+.probe { position: fixed; left: 0; top: 0; visibility: hidden; pointer-events: none;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
 
 /* ---------- Stage ---------- */
+/* The picture fills the tallest the viewport can get (phone toolbars hidden); the text is laid out in the
+   height that is always visible, so nothing sits behind a toolbar and no gap opens under the stage. */
 .stage {
   position: relative;
   width: 100%;
   height: 100vh;
-  height: 100svh;
+  height: 100lvh;
   overflow: hidden;
   background: linear-gradient(180deg, var(--studio-top) 0%, var(--studio) 45%, var(--studio-low) 100%);
 }
-.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity .7s ease; }
+.stage.has-frame canvas { opacity: 1; }   /* the first frame fades in over the studio gradient */
+.ui { position: absolute; left: 0; right: 0; top: 0; height: 100vh; height: 100svh; pointer-events: none; }
 .static-frame { display: none; }
-.js .stage[data-layout="pending"] :is(.hero, .contents-head, .parts, .cue, .hud) { visibility: hidden; }
+.js .stage[data-layout="pending"] :is(.hero, .contents-head, .parts, .hud) { visibility: hidden; }
 
 /* ---------- Title ---------- */
 .hero { position: absolute; z-index: 2; pointer-events: none; }
 .hero h1 {
-  margin: 14px 0 0;
-  font-weight: 600; letter-spacing: -.035em; line-height: 1.02;
+  margin: .24em 0 0;
+  font-weight: 600; letter-spacing: -.035em; line-height: 1.04;
   text-wrap: balance;
 }
-.hero-note { margin: 18px 0 0; font-size: 15px; line-height: 1.45; color: var(--ink-2); }
+.hero-note { margin: 1.1em 0 0; font-size: clamp(15px, 1.1vw, 21px); line-height: 1.45; color: var(--ink-2); }
 
 [data-layout="wide"] .hero {
   left: var(--gl); top: 0; bottom: 0;
   width: var(--hero-w, 420px);
   display: flex; flex-direction: column; justify-content: center;
 }
-[data-layout="wide"] .hero h1 { font-size: clamp(30px, 3.4vw, 60px); }
-[data-layout="narrow"] .hero { left: var(--gl); right: var(--gr); top: calc(var(--st) + clamp(20px, 6vh, 56px)); }
-[data-layout="narrow"] .hero h1 { font-size: clamp(28px, 7.6vw, 46px); }
-[data-layout="narrow"] .hero-note { margin-top: 12px; font-size: 14px; }
+[data-layout="wide"] .hero h1 { font-size: min(clamp(28px, 3.5vw, 76px), calc(var(--hero-w, 420px) / 6.3)); }
+[data-layout="narrow"] .hero { left: var(--gl); right: var(--gr); top: calc(var(--st) + clamp(20px, 5.5vh, 60px)); }
+[data-layout="narrow"] .hero h1 { font-size: clamp(28px, 7.6vw, 60px); }
+[data-layout="narrow"] .hero-note { margin-top: .8em; font-size: clamp(14px, 2.2vw, 20px); }
 
-/* ---------- Scroll cue + progress ---------- */
+/* Status line under the title: loading progress first, then the scroll hint */
 .cue {
-  position: absolute; z-index: 2; left: 50%;
-  bottom: calc(var(--sb) + clamp(14px, 3.5vh, 36px));
-  transform: translateX(-50%);
-  pointer-events: none;
+  margin: clamp(20px, 3.6vh, 44px) 0 0;
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; text-transform: uppercase;
+  white-space: nowrap; color: var(--ink-2); font-variant-numeric: tabular-nums;
 }
-.cue-inner {
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  font-family: var(--font-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
-  white-space: nowrap; color: var(--ink-2);
-}
-.cue-line { position: relative; width: 1px; height: 36px; overflow: hidden; background: var(--rule); }
-.cue-line::after {
-  content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--ink);
-  animation: cue 1.8s cubic-bezier(.6, 0, .2, 1) infinite;
-}
-@keyframes cue { to { transform: translateY(350%); } }
+[data-layout="narrow"] .cue { margin-top: clamp(14px, 2.4vh, 28px); }
+.cue-line { position: relative; flex: none; width: clamp(36px, 3.4vw, 64px); height: 1px; overflow: hidden; background: var(--rule); }
+.cue-fill { position: absolute; inset: 0; background: var(--ink); transform-origin: 0 50%; transform: scaleX(0); transition: transform .25s linear; }
+.cue.is-idle .cue-fill { right: auto; width: 45%; transform: none; transition: none; animation: cue 1.9s cubic-bezier(.6, 0, .2, 1) infinite; }
+@keyframes cue { from { transform: translateX(-110%); } to { transform: translateX(240%); } }
+.reduced .cue.is-idle .cue-fill { width: 100%; animation: none; }
 
+/* ---------- Progress while the sequence plays ---------- */
 .hud {
   position: absolute; z-index: 2;
-  left: var(--gl); right: var(--gr); bottom: calc(var(--sb) + 18px);
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; color: var(--ink-2);
-  font-variant-numeric: tabular-nums;
+  left: var(--gl); right: var(--gr); bottom: calc(var(--sb) + clamp(14px, 2.6vh, 28px));
+  display: flex; align-items: center; gap: 16px;
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .1em; color: var(--ink-2);
+  font-variant-numeric: tabular-nums; text-transform: uppercase; white-space: nowrap;
   pointer-events: none; visibility: hidden;
 }
-.hud-track { position: relative; flex: 0 1 180px; height: 1px; overflow: hidden; background: var(--rule); }
+.hud-track { position: relative; flex: 0 1 clamp(120px, 14vw, 260px); height: 1px; overflow: hidden; background: var(--rule); }
 .hud-fill { position: absolute; inset: 0; background: var(--ink); transform-origin: 0 50%; transform: scaleX(0); }
+.hud-load { color: var(--ink-3); }
+.hud-count { margin-left: auto; }
 
 /* ---------- Contents ---------- */
 .contents-head { position: absolute; z-index: 2; pointer-events: none; }
-.contents-head h2 { margin: 8px 0 0; font-size: clamp(26px, 2.6vw, 40px); font-weight: 600; letter-spacing: -.03em; line-height: 1.05; }
-[data-layout="wide"] .contents-head { top: calc(var(--st) + clamp(20px, 5.5vh, 64px)); left: 0; right: 0; text-align: center; }
-[data-layout="narrow"] .contents-head { top: calc(var(--st) + 18px); left: var(--gl); right: var(--gr); }
-[data-layout="narrow"] .contents-head h2 { font-size: 24px; }
+.contents-head h2 { margin: .28em 0 0; font-weight: 600; letter-spacing: -.03em; line-height: 1.08; }
+[data-layout="wide"] .contents-head { top: var(--head-top, calc(var(--st) + clamp(16px, 5vh, 64px))); left: 0; right: 0; text-align: center; }
+[data-layout="wide"] .contents-head h2 { font-size: clamp(24px, min(2.6vw, 5.6vh), 54px); }
+[data-layout="narrow"] .contents-head { top: var(--head-top, calc(var(--st) + 18px)); left: var(--gl); right: var(--gr); }
+[data-layout="narrow"] .contents-head h2 { font-size: clamp(24px, 5.2vw, 44px); }
 .no-head .contents-head { display: none; }
 
 .parts { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
@@ -137,66 +164,62 @@ body.is-locked { overflow: hidden; }
 .part-line { position: absolute; background: var(--rule); }
 .part .num {
   display: block;
-  font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .08em;
+  font-family: var(--font-mono); font-weight: 500; letter-spacing: .08em;
   color: var(--copper); font-variant-numeric: tabular-nums;
 }
-.part h3 { margin: 6px 0 8px; font-size: clamp(15px, 1.3vw, 20px); font-weight: 600; letter-spacing: -.015em; line-height: 1.15; }
+.part h3 { font-weight: 600; letter-spacing: -.015em; line-height: 1.15; }
 .part ul { list-style: none; margin: 0; padding: 0; }
-.part li { font-size: clamp(12.5px, .9vw, 14px); line-height: 1.35; color: var(--ink-2); }
-.part li + li { margin-top: 3px; }
+.part li { line-height: 1.35; color: var(--ink-2); }
 
-/* Wide: each label hangs under its part */
+/* Wide: each label hangs under its part; its type scales with the room between two parts */
 [data-layout="wide"] .part {
   position: absolute; left: 0; top: 0;
   width: var(--label-w, 200px); margin-left: calc(var(--label-w, 200px) / -2);
-  padding-top: 26px; text-align: center;
+  padding-top: clamp(16px, 2.6vh, 30px); text-align: center;
 }
-[data-layout="wide"] .part-line { top: 0; left: 50%; width: 1px; height: 16px; transform-origin: 50% 0; }
-.compact[data-layout="wide"] .part h3 { font-size: 14px; margin-bottom: 5px; }
-.compact[data-layout="wide"] .part li { font-size: 11.5px; }
+[data-layout="wide"] .part-line { top: 0; left: 50%; width: 1px; height: clamp(9px, 1.5vh, 18px); transform-origin: 50% 0; transform: scaleY(var(--line, 1)); }
+[data-layout="wide"] .part .num { font-size: clamp(10px, calc(var(--label-w, 200px) * .05), 15px); }
+[data-layout="wide"] .part h3 { margin: .32em 0 .42em; font-size: clamp(13px, calc(var(--label-w, 200px) * .098), 30px); }
+[data-layout="wide"] .part li { font-size: clamp(11px, calc(var(--label-w, 200px) * .062), 19px); }
+[data-layout="wide"] .part li + li { margin-top: .18em; }
+[data-layout="wide"] .part :is(h3, li) { text-wrap: balance; }
+.compact[data-layout="wide"] .part { padding-top: clamp(12px, 2vh, 22px); }
+.compact[data-layout="wide"] .part h3 { margin: .2em 0 .3em; font-size: clamp(12px, calc(var(--label-w, 200px) * .088), 26px); }
+.compact[data-layout="wide"] .part li { font-size: clamp(10.5px, calc(var(--label-w, 200px) * .056), 17px); line-height: 1.28; }
 
 /* Narrow: numbered badges on the parts, a list underneath */
 .marker {
-  position: absolute; left: 0; top: 0; margin: -12px 0 0 -12px;
-  width: 24px; height: 24px; border-radius: 50%;
+  --m: clamp(22px, 4.6vw, 36px);
+  position: absolute; left: 0; top: 0; margin: calc(var(--m) / -2) 0 0 calc(var(--m) / -2);
+  width: var(--m); height: var(--m); border-radius: 50%;
   background: var(--ink); color: var(--paper);
-  font-family: var(--font-mono); font-size: 11px; font-weight: 500; line-height: 24px; text-align: center;
+  font-family: var(--font-mono); font-size: clamp(10px, 1.9vw, 15px); font-weight: 500; line-height: var(--m); text-align: center;
   visibility: hidden;
 }
 [data-layout="wide"] .marker { display: none; }
 [data-layout="narrow"] .parts-list { position: absolute; left: var(--gl); right: var(--gr); top: 0; }
-[data-layout="narrow"] .part { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: 8px; padding: 10px 0; transform: none; }
-[data-layout="narrow"] .part-line { top: 0; left: 0; right: 0; height: 1px; transform-origin: 0 50%; }
-[data-layout="narrow"] .part .num { grid-row: 1 / span 2; padding-top: 3px; }
+[data-layout="narrow"] .part { display: grid; grid-template-columns: clamp(32px, 7vw, 60px) minmax(0, 1fr); column-gap: 8px; padding: clamp(9px, 1.5vh, 18px) 0; }
+[data-layout="narrow"] .part-line { top: 0; left: 0; right: 0; height: 1px; transform-origin: 0 50%; transform: scaleX(var(--line, 1)); }
+[data-layout="narrow"] .part .num { grid-row: 1 / span 2; padding-top: .28em; font-size: clamp(12px, 1.9vw, 16px); }
 [data-layout="narrow"] .part :is(h3, ul) { grid-column: 2; }
-[data-layout="narrow"] .part h3 { margin: 0 0 3px; font-size: 16px; }
+[data-layout="narrow"] .part h3 { margin: 0 0 .2em; font-size: clamp(16px, 3.1vw, 27px); }
 [data-layout="narrow"] .part ul { display: flex; flex-wrap: wrap; }
-[data-layout="narrow"] .part li { margin: 0; font-size: 13px; }
-[data-layout="narrow"] .part li:not(:last-child)::after { content: "·"; margin: 0 6px; color: var(--ink-3); }
-.compact[data-layout="narrow"] .part { padding: 7px 0; }
+[data-layout="narrow"] .part li { font-size: clamp(13px, 2.3vw, 19px); }
+[data-layout="narrow"] .part li:not(:last-child)::after { content: "·"; margin: 0 .5em; color: var(--ink-3); }
+[data-layout="narrow"] .part li.eol::after { visibility: hidden; }   /* no separator at the end of a line */
+.compact[data-layout="narrow"] .part { padding: 6px 0; }
 .compact[data-layout="narrow"] .part h3 { font-size: 15px; }
-.compact[data-layout="narrow"] .part li { font-size: 12px; }
+.compact[data-layout="narrow"] .part li { font-size: 12px; line-height: 1.3; }
+.compact[data-layout="narrow"] .contents-head h2 { font-size: 22px; }
 
-/* ---------- Loader ---------- */
+/* ---------- Before the first frame arrives ---------- */
 .loader {
   position: absolute; inset: 0; z-index: 5;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-  background: rgba(200, 204, 205, .6);
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  display: grid; place-items: center; pointer-events: none;
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2);
+  opacity: 0; transition: opacity .4s ease;
 }
-.loader-track { position: relative; width: min(220px, 60vw); height: 1px; overflow: hidden; background: var(--rule); }
-.loader-fill { position: absolute; inset: 0; background: var(--ink); transform-origin: 0 50%; transform: scaleX(0); transition: transform .2s linear; }
-.loader-text {
-  margin: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--ink-2); font-variant-numeric: tabular-nums;
-}
-.loader-skip {
-  font: 500 12px var(--font-sans); color: var(--ink);
-  background: none; border: 1px solid var(--rule); border-radius: 999px; padding: 7px 16px; cursor: pointer;
-  opacity: 0; pointer-events: none; transition: opacity .3s;
-}
-.loader-skip.show { opacity: 1; pointer-events: auto; }
-.loader-skip:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.loader.is-visible { opacity: 1; }   /* only shows up on slow connections */
 
 /* ---------- Presenters ---------- */
 .credits {
@@ -208,107 +231,110 @@ body.is-locked { overflow: hidden; }
   text-align: center;
   background: linear-gradient(180deg, var(--studio-low) 0%, var(--paper) 100%);
 }
-.credits-inner { width: 100%; max-width: 1100px; }
+.credits-inner { width: 100%; max-width: 1500px; }
 .names {
-  list-style: none; margin: clamp(20px, 3.5vh, 36px) 0 0; padding: 0;
+  list-style: none; margin: clamp(20px, 3.5vh, 40px) 0 0; padding: 0;
   display: grid; gap: clamp(4px, 1vh, 12px);
 }
 .names li {
-  font-size: clamp(28px, 5.4vw, 76px); font-weight: 600; letter-spacing: -.035em;
+  font-size: clamp(28px, 5.4vw, 92px); font-weight: 600; letter-spacing: -.035em;
   line-height: 1.12;            /* room for ç, ı and ü inside the reveal masks */
   text-wrap: balance;
 }
 @media (max-width: 699px) { .names li { font-size: clamp(26px, 7.8vw, 36px); } }
-.credits-rule { width: 56px; height: 1px; margin: clamp(32px, 6vh, 56px) auto clamp(16px, 2.5vh, 22px); background: var(--ink); transform-origin: 50% 50%; }
-.thanks { margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.credits-rule { width: clamp(56px, 4vw, 84px); height: 1px; margin: clamp(32px, 6vh, 64px) auto clamp(16px, 2.5vh, 26px); background: var(--ink); transform-origin: 50% 50%; }
+.thanks { margin: 0; font-family: var(--font-mono); font-size: clamp(12px, .85vw, 16px); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
 
-/* ---------- Static fallback (no JS, no GSAP, or reduced motion) ---------- */
+/* ---------- Plain page (no JavaScript, or the scripts could not start) ---------- */
 :is(.no-js .stage, .stage[data-layout="static"]) { height: auto; overflow: visible; padding-bottom: 56px; }
 :is(.no-js .stage, .stage[data-layout="static"]) :is(canvas, .loader, .cue, .hud, .marker, .part-line) { display: none; }
-:is(.no-js .stage, .stage[data-layout="static"]) :is(.hero, .contents-head, .parts, .parts-list, .part) { position: static; }
-:is(.no-js .stage, .stage[data-layout="static"]) .hero { padding: calc(var(--st) + 56px) var(--gr) 32px var(--gl); max-width: 980px; }
+:is(.no-js .stage, .stage[data-layout="static"]) :is(.ui, .hero, .contents-head, .parts, .parts-list, .part) { position: static; }
+:is(.no-js .stage, .stage[data-layout="static"]) .ui { height: auto; }
+:is(.no-js .stage, .stage[data-layout="static"]) .hero { padding: calc(var(--st) + 56px) var(--gr) 40px var(--gl); max-width: 980px; }
 :is(.no-js .stage, .stage[data-layout="static"]) .hero h1 { font-size: clamp(32px, 5vw, 64px); }
 :is(.no-js .stage, .stage[data-layout="static"]) .static-frame { display: block; width: 100%; height: auto; }
 :is(.no-js .stage, .stage[data-layout="static"]) .contents-head { padding: 40px var(--gr) 16px var(--gl); }
+:is(.no-js .stage, .stage[data-layout="static"]) .contents-head h2 { font-size: clamp(26px, 3.4vw, 40px); }
 :is(.no-js .stage, .stage[data-layout="static"]) .parts-list {
-  display: grid; gap: 20px; padding: 0 var(--gr) 0 var(--gl);
+  display: grid; gap: 24px; padding: 0 var(--gr) 0 var(--gl);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
 }
+:is(.no-js .stage, .stage[data-layout="static"]) .part h3 { margin: 6px 0 8px; font-size: 19px; }
+:is(.no-js .stage, .stage[data-layout="static"]) .part li { font-size: 15px; }
+:is(.no-js .stage, .stage[data-layout="static"]) .part .num { font-size: 13px; }
 </style>
 </head>
 <body>
+<div class="probe" id="safe" aria-hidden="true"></div>
 <div id="smooth-wrapper">
   <div id="smooth-content">
     <main>
       <section class="sequence" id="sequence" aria-label="Introduction and contents">
         <div class="stage" id="stage" data-layout="pending">
           <canvas id="seq" aria-hidden="true"></canvas>
-          <img class="static-frame" src="frames-webp/frame-240.webp" alt="A robot head taken apart into five components">
 
-          <header class="hero" id="hero">
-            <p class="eyebrow">Presentation</p>
-            <h1 id="hero-title">AI in Everyday Life and Computer Engineering</h1>
-            <p class="hero-note">A talk in five parts.</p>
-          </header>
+          <div class="ui" id="ui">
+            <header class="hero" id="hero">
+              <p class="eyebrow">Presentation</p>
+              <h1 id="hero-title">AI in Everyday Life and Computer Engineering</h1>
+              <p class="hero-note">A talk in five parts.</p>
+              <p class="cue" id="cue" aria-hidden="true"><span class="cue-line"><span class="cue-fill" id="cue-fill"></span></span><span id="cue-label">Loading</span></p>
+            </header>
 
-          <div class="cue" id="cue" aria-hidden="true">
-            <div class="cue-inner"><span id="cue-label">Scroll</span><span class="cue-line"></span></div>
-          </div>
+            <img class="static-frame" src="frames-webp/frame-240.webp" alt="A robot head taken apart into five components" loading="lazy" decoding="async">
 
-          <div class="hud" id="hud" aria-hidden="true">
-            <span class="hud-track"><span class="hud-fill" id="hud-fill"></span></span>
-            <span id="hud-count">001 / 240</span>
-          </div>
+            <div class="hud" id="hud" aria-hidden="true">
+              <span class="hud-track"><span class="hud-fill" id="hud-fill"></span></span>
+              <span class="hud-load" id="hud-load"></span>
+              <span class="hud-count" id="hud-count">001 / 240</span>
+            </div>
 
-          <div class="contents-head" id="contents-head">
-            <p class="eyebrow">Contents</p>
-            <h2 id="contents-title">What we’ll cover</h2>
-          </div>
+            <div class="contents-head" id="contents-head">
+              <p class="eyebrow">Contents</p>
+              <h2 id="contents-title">What we’ll cover</h2>
+            </div>
 
-          <div class="parts" id="parts">
-            <span class="marker" aria-hidden="true">1</span>
-            <span class="marker" aria-hidden="true">2</span>
-            <span class="marker" aria-hidden="true">3</span>
-            <span class="marker" aria-hidden="true">4</span>
-            <span class="marker" aria-hidden="true">5</span>
-            <ol class="parts-list" id="parts-list">
-              <li class="part">
-                <span class="part-line" aria-hidden="true"></span>
-                <span class="num">01</span>
-                <h3>Introduction</h3>
-                <ul><li>AI in Everyday Life and Computer Engineering</li><li>Agenda</li></ul>
-              </li>
-              <li class="part">
-                <span class="part-line" aria-hidden="true"></span>
-                <span class="num">02</span>
-                <h3>Understanding AI</h3>
-                <ul><li>What Is AI?</li><li>A Brief History of AI</li></ul>
-              </li>
-              <li class="part">
-                <span class="part-line" aria-hidden="true"></span>
-                <span class="num">03</span>
-                <h3>AI in Daily Life</h3>
-                <ul><li>Everyday Examples</li><li>Benefits and Risks</li></ul>
-              </li>
-              <li class="part">
-                <span class="part-line" aria-hidden="true"></span>
-                <span class="num">04</span>
-                <h3>AI in Our Field</h3>
-                <ul><li>AI Tools and Use Cases</li><li>How LLMs Work</li><li>Basic vs. Technical Prompts</li><li>Token Efficiency and Accuracy</li></ul>
-              </li>
-              <li class="part">
-                <span class="part-line" aria-hidden="true"></span>
-                <span class="num">05</span>
-                <h3>Conclusion</h3>
-                <ul><li>Using AI Responsibly</li><li>Key Takeaways</li></ul>
-              </li>
-            </ol>
-          </div>
+            <div class="parts" id="parts">
+              <span class="marker" aria-hidden="true">1</span>
+              <span class="marker" aria-hidden="true">2</span>
+              <span class="marker" aria-hidden="true">3</span>
+              <span class="marker" aria-hidden="true">4</span>
+              <span class="marker" aria-hidden="true">5</span>
+              <ol class="parts-list" id="parts-list">
+                <li class="part">
+                  <span class="part-line" aria-hidden="true"></span>
+                  <span class="num">01</span>
+                  <h3>Introduction</h3>
+                  <ul><li>AI in Everyday Life and Computer Engineering</li><li>Agenda</li></ul>
+                </li>
+                <li class="part">
+                  <span class="part-line" aria-hidden="true"></span>
+                  <span class="num">02</span>
+                  <h3>Understanding AI</h3>
+                  <ul><li>What Is AI?</li><li>A Brief History of AI</li></ul>
+                </li>
+                <li class="part">
+                  <span class="part-line" aria-hidden="true"></span>
+                  <span class="num">03</span>
+                  <h3>AI in Daily Life</h3>
+                  <ul><li>Everyday Examples</li><li>Benefits and Risks</li></ul>
+                </li>
+                <li class="part">
+                  <span class="part-line" aria-hidden="true"></span>
+                  <span class="num">04</span>
+                  <h3>AI in Our Field</h3>
+                  <ul><li>AI Tools and Use Cases</li><li>How LLMs Work</li><li>Basic vs. Technical Prompts</li><li>Token Efficiency and Accuracy</li></ul>
+                </li>
+                <li class="part">
+                  <span class="part-line" aria-hidden="true"></span>
+                  <span class="num">05</span>
+                  <h3>Conclusion</h3>
+                  <ul><li>Using AI Responsibly</li><li>Key Takeaways</li></ul>
+                </li>
+              </ol>
+            </div>
 
-          <div class="loader" id="loader" role="status" aria-live="polite">
-            <div class="loader-track"><span class="loader-fill" id="loader-fill"></span></div>
-            <p class="loader-text" id="loader-text">Loading frames</p>
-            <button class="loader-skip" id="loader-skip" type="button">Continue while loading</button>
+            <div class="loader" id="loader" aria-hidden="true">Loading</div>
           </div>
         </div>
       </section>
@@ -328,11 +354,11 @@ body.is-locked { overflow: hidden; }
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollSmoother.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollToPlugin.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js"></script>
+<script src="vendor/gsap/gsap.min.js"></script>
+<script src="vendor/gsap/ScrollTrigger.min.js"></script>
+<script src="vendor/gsap/ScrollSmoother.min.js"></script>
+<script src="vendor/gsap/ScrollToPlugin.min.js"></script>
+<script src="vendor/gsap/SplitText.min.js"></script>
 <script>
 (function () {
   "use strict";
@@ -343,59 +369,68 @@ body.is-locked { overflow: hidden; }
     framePath: (i) => "frames-webp/frame-" + String(i + 1).padStart(3, "0") + ".webp",
     imgW: 1920,
     imgH: 1080,
-    robot: { x0: 745, x1: 1175, y0: 170, y1: 892 },   // the head in the first frame (image px)
-    partX: [285, 608, 974, 1336, 1649],                // centre of each part in the last frame
+    // Measured from the frames, in image pixels
+    head: { x0: 745, x1: 1175, y0: 167, y1: 892 },   // the head in the first frame
+    partX: [285, 608, 974, 1336, 1649],              // centre of each part in the last frame
     partTop: 274,
     partBottom: 815,
-    fitWidth: 1760,             // wide screens: image px that must stay visible so all five parts fit
-    camera: {                   // narrow screens: width (incl. margin) and centre of the action, measured every 12 frames
+    partsCenter: 970,                                // centre of the final line-up
+    fitW: 1760,   // wide screens: width that must stay visible so the final line-up fits
+    fitH: 1038,   // wide screens: height that must stay visible so the tallest moment of the disassembly fits
+    camera: {     // narrow screens: width (incl. margin) and centre of the action, every 12 frames plus the last one
       every: 12,
       span: [490, 490, 492, 555, 698, 885, 1068, 1219, 1324, 1403, 1532, 1614, 1631, 1638, 1692, 1716, 1716, 1718, 1720, 1723, 1728],
       center: [960, 960, 960, 962, 969, 983, 1005, 1033, 1058, 1060, 1035, 998, 963, 946, 951, 965, 969, 969, 969, 970, 970],
     },
-    scrollLength: 4.2,          // pinned scroll distance of the robot scene, in viewport heights
-    skipAfter: 9000,            // ms before "Continue while loading" appears
+    scrollLength: 4.3,   // pinned scroll distance of the robot scene, in viewport heights
+    parallel: 8,         // frames downloaded at the same time
+    unlockAfter: 7000,   // ms after the first frame before scrolling is allowed even if key frames are still loading
   };
-  const WIDE = "(min-width: 700px) and (min-aspect-ratio: 6/5)";
-  const NARROW = "not all and (min-width: 700px) and (min-aspect-ratio: 6/5)";
-  const FINE = "(hover: hover) and (pointer: fine)";
+  const WIDE_QUERY = "(min-width: 700px) and (min-aspect-ratio: 6/5)";
+  const FLOOR = "208,212,213";   // --studio-low: the canvas fades to it under the parts, and the next section starts with it
   /* ========================================== */
 
-  const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
   const root = document.documentElement;
   const body = document.body;
   const stage = $("#stage");
+  const ui = $("#ui");
   const canvas = $("#seq");
-  const ctx = canvas.getContext("2d", { alpha: false });
   const hero = $("#hero");
   const cue = $("#cue");
+  const cueFill = $("#cue-fill");
   const cueLabel = $("#cue-label");
   const hud = $("#hud");
   const hudFill = $("#hud-fill");
+  const hudLoad = $("#hud-load");
   const hudCount = $("#hud-count");
   const head = $("#contents-head");
   const list = $("#parts-list");
   const parts = $$(".part", list);
   const markers = $$(".marker");
   const loader = $("#loader");
-  const loaderFill = $("#loader-fill");
-  const loaderText = $("#loader-text");
-  const loaderSkip = $("#loader-skip");
   const credits = $("#credits");
-  const LAST = CONFIG.frameCount - 1;
+  const safe = $("#safe");
+
+  const N = CONFIG.frameCount;
+  const LAST = N - 1;
+  const W = CONFIG.imgW;
+  const H = CONFIG.imgH;
   const pad3 = (n) => String(n).padStart(3, "0");
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const px = (v) => Math.round(v) + "px";
 
   function goStatic() {
-    root.dataset.motion = "static";
     stage.dataset.layout = "static";
     body.classList.remove("is-locked");
   }
 
-  // No GSAP (blocked CDN) or the visitor asked for less motion: show the finished state as a normal page.
-  if (!window.gsap || !window.ScrollTrigger || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  // Without GSAP or a 2D canvas the page is shown as a plain document.
+  const ctx = canvas.getContext ? canvas.getContext("2d", { alpha: false }) : null;
+  if (!window.gsap || !window.ScrollTrigger || !ctx) {
+    window.__booted = true;
     goStatic();
     return;
   }
@@ -407,80 +442,356 @@ body.is-locked { overflow: hidden; }
   if (hasSmoother) gsap.registerPlugin(ScrollSmoother);
   if (hasScrollTo) gsap.registerPlugin(ScrollToPlugin);
 
+  // "Reduce motion" keeps the scroll-driven sequence (it is the content, and it only moves when the visitor scrolls)
+  // but drops what moves on its own: inertial scrolling and the looping hint.
+  const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const REDUCED = reducedQuery.matches;
+  const FINE = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const wideQuery = window.matchMedia(WIDE_QUERY);
+  if (REDUCED) root.classList.add("reduced");
+  if (reducedQuery.addEventListener) reducedQuery.addEventListener("change", () => window.location.reload());
+
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   window.scrollTo(0, 0);
-  body.classList.add("is-locked");
-  hudCount.textContent = pad3(1) + " / " + pad3(CONFIG.frameCount);
+  body.classList.add("is-locked");          // until enough frames are in
+  const loaderTimer = setTimeout(() => loader.classList.add("is-visible"), 600);
+  hudCount.textContent = pad3(1) + " / " + pad3(N);
 
-  /* ---------------- Preload ---------------- */
-  const images = new Array(CONFIG.frameCount);
-  const ready = new Uint8Array(CONFIG.frameCount);
-  let settled = 0;
+  /* ---------------- State ---------------- */
+  // frame: playhead | settle: the title has left and the head is centred | lift: room made for the contents
+  const state = { frame: 0, settle: 0, lift: 0 };
+  const L = {
+    mode: "", vw: 0, vh: 0, uh: 0, dpr: 1,     // vh: height of the picture | uh: height the text is laid out in
+    sSeq: 1, sStart: 1, sMid: 1, sEnd: 1,
+    cxStart: 0, cxEnd: 0, cyStart: 0, cyMid: 0, cyEnd: 0,
+    labelGap: 10, markOff: 0, listOff: 0, placeDirty: true,
+  };
+  let dirty = true;
+  const invalidate = () => { dirty = true; };
 
-  // First and last frame, then coarse-to-fine, so a usable spread exists early.
+  /* ---------------- Frames: a small download queue ---------------- */
+  // Key frames go first (a coarse version of the whole sequence), then whatever is nearest to the playhead.
+  const images = new Array(N);
+  const ready = new Uint8Array(N);
+  const pending = new Uint8Array(N);
+  const tries = new Uint8Array(N);
+  const retryAt = new Float64Array(N);
+  const KEYS = [];
+  for (let i = 0; i < LAST; i += CONFIG.camera.every) KEYS.push(i);
+  KEYS.push(LAST);
   const order = [0, LAST];
-  const queued = new Set(order);
-  [32, 16, 8, 4, 2, 1].forEach((step) => {
-    for (let i = 0; i < CONFIG.frameCount; i += step) {
-      if (!queued.has(i)) { queued.add(i); order.push(i); }
-    }
+  [48, 24, 12].forEach((step) => {
+    for (let i = 0; i < N; i += step) if (order.indexOf(i) < 0) order.push(i);
   });
+  let orderAt = 0;
+  let inflight = 0;
+  let loadedCount = 0;
+  let settledCount = 0;
+  let firstDone = false;
+  let keysDone = false;
+  let allDone = false;
 
-  function onSettled(i, ok) {
-    if (ok) ready[i] = 1;
-    settled++;
-    loaderFill.style.transform = "scaleX(" + (settled / CONFIG.frameCount).toFixed(3) + ")";
-    loaderText.textContent = "Loading frames " + pad3(settled) + " / " + pad3(CONFIG.frameCount);
-    if (ok && Math.abs(i - Math.round(state.frame)) < 4) invalidate();
-    if (settled === CONFIG.frameCount) begin();
+  const wanted = (i) => !ready[i] && !pending[i] && tries[i] < 3 && retryAt[i] <= Date.now();
+
+  function pick() {
+    while (orderAt < order.length) {
+      if (wanted(order[orderAt])) return order[orderAt];
+      orderAt++;
+    }
+    const p = Math.round(state.frame);
+    for (let d = 0; d < N; d++) {
+      if (p + d <= LAST && wanted(p + d)) return p + d;
+      if (d && p - d >= 0 && wanted(p - d)) return p - d;
+    }
+    return -1;
   }
 
-  order.forEach((i) => {
+  function pump() {
+    while (inflight < CONFIG.parallel) {
+      const i = pick();
+      if (i < 0) return;
+      request(i);
+    }
+  }
+
+  function request(i) {
+    pending[i] = 1;
+    inflight++;
+    tries[i]++;
     const img = new Image();
     img.decoding = "async";
-    img.onload = () => {
-      const decoded = img.decode ? img.decode().catch(() => {}) : Promise.resolve();
-      decoded.then(() => onSettled(i, true));
-    };
-    img.onerror = () => onSettled(i, false);
+    img.onload = () => settle(i, img, true);
+    img.onerror = () => settle(i, img, false);
     img.src = CONFIG.framePath(i);
-    images[i] = img;
-  });
+  }
 
-  const skipTimer = setTimeout(() => loaderSkip.classList.add("show"), CONFIG.skipAfter);
-  loaderSkip.addEventListener("click", begin);
+  function settle(i, img, ok) {
+    pending[i] = 0;
+    inflight--;
+    if (ok) {
+      images[i] = img;
+      ready[i] = 1;
+      loadedCount++;
+      settledCount++;
+      const k = KEYS.indexOf(i);
+      if (k === 0) grabEdges(0);
+      else if (k > 0) idle(() => grabEdges(k));
+      if (Math.abs(i - state.frame) < 13) invalidate();
+    } else if (tries[i] >= 3) {
+      settledCount++;                       // given up on this frame; its neighbours stand in for it
+    } else {
+      retryAt[i] = Date.now() + 700 * tries[i];
+      setTimeout(pump, 720 * tries[i]);
+    }
+    progress();
+    pump();
+  }
 
-  // Draw the requested frame, or the nearest one that has arrived.
+  const settledFrame = (i) => ready[i] || tries[i] >= 3;
+
+  function progress() {
+    const ratio = loadedCount / N;
+    const pct = Math.round(ratio * 100);
+    if (!unlocked) cueLabel.textContent = "Loading " + pct + "%";
+    if (!allDone) {
+      cueFill.style.transform = "scaleX(" + ratio.toFixed(3) + ")";
+      hudLoad.textContent = "Loading " + pct + "%";
+    }
+    if (!firstDone && settledFrame(0)) { firstDone = true; maybeReveal(); }
+    if (!keysDone && KEYS.every(settledFrame)) { keysDone = true; maybeUnlock(); }
+    if (!allDone && settledCount === N) {
+      allDone = true;
+      hudLoad.textContent = "";
+      cue.classList.add("is-idle");
+    }
+  }
+
+  // The requested frame, or the nearest one that has arrived.
   function frameImage(i) {
     if (ready[i]) return images[i];
-    for (let d = 1; d < CONFIG.frameCount; d++) {
+    for (let d = 1; d < N; d++) {
       if (i - d >= 0 && ready[i - d]) return images[i - d];
-      if (i + d < CONFIG.frameCount && ready[i + d]) return images[i + d];
+      if (i + d <= LAST && ready[i + d]) return images[i + d];
     }
     return null;
   }
 
-  /* ---------------- Virtual camera + layout ---------------- */
-  // settle: on narrow screens the title leaves and the head moves to the centre | lift: room for the contents
-  const state = { frame: 0, settle: 0, lift: 0 };
-  const L = { mode: "pending", vw: 0, vh: 0, dpr: 1, sStart: 1, sMid: 1, sEnd: 1, cyStart: 0, cyMid: 0, cyEnd: 0 };
-  const BG = [[192, 196, 197, 0], [200, 204, 205, .45], [208, 212, 213, 1]];
-  let dirty = true;
-  const invalidate = () => { dirty = true; };
-
-  // Narrow-screen camera track: interpolates the measured keyframes at any (fractional) frame.
-  function track(values, f) {
-    const n = values.length - 1;
-    const at = (k) => (k === n ? LAST : k * CONFIG.camera.every);
-    const k = Math.min(n - 1, Math.floor(f / CONFIG.camera.every));
-    const u = clamp((f - at(k)) / (at(k + 1) - at(k)), 0, 1);
-    return lerp(values[k], values[k + 1], u);
+  // Ask the browser to decode the next few frames in the scroll direction before they are drawn.
+  let warmFrom = -1;
+  function warm(idx) {
+    if (idx === warmFrom) return;
+    const dir = idx >= warmFrom ? 1 : -1;
+    warmFrom = idx;
+    for (let k = 1; k <= 3; k++) {
+      const j = idx + dir * k;
+      if (j >= 0 && j <= LAST && ready[j] && images[j].decode) images[j].decode().catch(() => {});
+    }
   }
 
+  /* ---------------- Studio backdrop beyond the frame ---------------- */
+  // Wherever the frame does not reach the edge of the screen, the colours of its own rim are continued outwards
+  // and blended a little way back into the frame, so there is never a visible border. The rim is sampled once
+  // per key frame into two tiny sprites. Each key frame owns ER rows (or columns) of a sprite:
+  //   0-2 near rim, opaque | 3-4 clear | 5-6 clear | 7-9 far rim, opaque
+  // A band is drawn from the middle opaque line; the blend from an opaque line next to a clear one.
+  const EW = 80;                 // samples along the top and bottom rim
+  const EH = 45;                 // samples along the left and right rim
+  const ER = 10;
+  const FEATHER = { x: 96, top: 48, bottom: 64 };   // depth of the blend, in image pixels (the action never comes this close)
+  const K = KEYS.length;
+  const rowsC = document.createElement("canvas");
+  const colsC = document.createElement("canvas");
+  rowsC.width = EW; rowsC.height = K * ER;
+  colsC.width = K * ER; colsC.height = EH;
+  const rctx = rowsC.getContext("2d");
+  const cctx = colsC.getContext("2d");
+  rctx.imageSmoothingQuality = cctx.imageSmoothingQuality = "medium";
+  const edgeReady = new Uint8Array(K);
+  let canRead = true;            // false once pixels turn out to be unreadable (a page opened straight from disk)
+  let rowScratch = null;
+  let colScratch = null;
+  const idle = window.requestIdleCallback
+    ? (fn) => window.requestIdleCallback(fn, { timeout: 500 })
+    : (fn) => setTimeout(fn, 80);
+
+  const scratchFor = (w, h) => {
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    return c.getContext("2d", { willReadFrequently: true });
+  };
+
+  // Exact rim colours: copy the two strips at full size, read them back and average each cell.
+  function readRim(img, k, t) {
+    const nw = img.naturalWidth;
+    const nh = img.naturalHeight;
+    if (!rowScratch || rowScratch.canvas.width !== nw) rowScratch = scratchFor(nw, 2 * t);
+    if (!colScratch || colScratch.canvas.height !== nh) colScratch = scratchFor(2 * t, nh);
+
+    rowScratch.drawImage(img, 0, 0, nw, t, 0, 0, nw, t);
+    rowScratch.drawImage(img, 0, nh - t, nw, t, 0, t, nw, t);
+    const rd = rowScratch.getImageData(0, 0, nw, 2 * t).data;
+    const rows = rctx.createImageData(EW, ER);
+    for (let c = 0; c < EW; c++) {
+      const xa = Math.round((c * nw) / EW);
+      const xb = Math.max(xa + 1, Math.round(((c + 1) * nw) / EW));
+      for (let far = 0; far < 2; far++) {
+        let r = 0, g = 0, bl = 0;
+        for (let y = far * t; y < (far + 1) * t; y++) {
+          for (let x = xa; x < xb; x++) { const o = (y * nw + x) * 4; r += rd[o]; g += rd[o + 1]; bl += rd[o + 2]; }
+        }
+        const n = (xb - xa) * t;
+        for (let line = 0; line < 3; line++) {
+          const o = ((far * 7 + line) * EW + c) * 4;
+          rows.data[o] = Math.round(r / n); rows.data[o + 1] = Math.round(g / n); rows.data[o + 2] = Math.round(bl / n); rows.data[o + 3] = 255;
+        }
+      }
+    }
+
+    colScratch.drawImage(img, 0, 0, t, nh, 0, 0, t, nh);
+    colScratch.drawImage(img, nw - t, 0, t, nh, t, 0, t, nh);
+    const cd = colScratch.getImageData(0, 0, 2 * t, nh).data;
+    const cols = cctx.createImageData(ER, EH);
+    for (let c = 0; c < EH; c++) {
+      const ya = Math.round((c * nh) / EH);
+      const yb = Math.max(ya + 1, Math.round(((c + 1) * nh) / EH));
+      for (let far = 0; far < 2; far++) {
+        let r = 0, g = 0, bl = 0;
+        for (let y = ya; y < yb; y++) {
+          for (let x = far * t; x < (far + 1) * t; x++) { const o = (y * 2 * t + x) * 4; r += cd[o]; g += cd[o + 1]; bl += cd[o + 2]; }
+        }
+        const n = (yb - ya) * t;
+        for (let line = 0; line < 3; line++) {
+          const o = (c * ER + far * 7 + line) * 4;
+          cols.data[o] = Math.round(r / n); cols.data[o + 1] = Math.round(g / n); cols.data[o + 2] = Math.round(bl / n); cols.data[o + 3] = 255;
+        }
+      }
+    }
+    rctx.putImageData(rows, 0, k * ER);
+    cctx.putImageData(cols, k * ER, 0);
+  }
+
+  // Without read access the browser scales the strips down itself: a touch less exact, and the blend hides the rest.
+  function scaleRim(img, k, t) {
+    const nw = img.naturalWidth;
+    const nh = img.naturalHeight;
+    const b = k * ER;
+    rctx.clearRect(0, b, EW, ER);
+    cctx.clearRect(b, 0, ER, EH);
+    for (let line = 0; line < 3; line++) {
+      rctx.drawImage(img, 0, 0, nw, t, 0, b + line, EW, 1);
+      rctx.drawImage(img, 0, nh - t, nw, t, 0, b + 7 + line, EW, 1);
+      cctx.drawImage(img, 0, 0, t, nh, b + line, 0, 1, EH);
+      cctx.drawImage(img, nw - t, 0, t, nh, b + 7 + line, 0, 1, EH);
+    }
+  }
+
+  function grabEdges(k) {
+    const img = images[KEYS[k]];
+    if (!img || edgeReady[k]) return;
+    const t = Math.max(4, Math.round(img.naturalHeight * 0.011));   // thickness of the sampled rim
+    try {
+      if (canRead) {
+        try { readRim(img, k, t); } catch (e) { canRead = false; }
+      }
+      if (!canRead) scaleRim(img, k, t);
+      edgeReady[k] = 1;
+      invalidate();
+    } catch (e) { /* the backdrop falls back to the nearest key frame */ }
+  }
+
+  function nearestEdge(k) {
+    if (edgeReady[k]) return k;
+    for (let d = 1; d < K; d++) {
+      if (k - d >= 0 && edgeReady[k - d]) return k - d;
+      if (k + d < K && edgeReady[k + d]) return k + d;
+    }
+    return -1;
+  }
+
+  // Bands outside the frame, from key frame k. (Plain linear filtering for the sprites: sharper filters overshoot.)
+  function drawBands(k, alpha, x, y, w, h) {
+    const vw = L.vw;
+    const vh = L.vh;
+    const near = k * ER + 1;
+    const far = k * ER + 8;
+    const x1 = x + w;
+    const y1 = y + h;
+    const o = 1;                 // overlap under the frame, so no hairline can show
+    ctx.imageSmoothingQuality = "low";
+    ctx.globalAlpha = alpha;
+    if (y > 0) ctx.drawImage(rowsC, 0, near, EW, 1, x, 0, w, y + o);
+    if (y1 < vh) ctx.drawImage(rowsC, 0, far, EW, 1, x, y1 - o, w, vh - y1 + o);
+    if (x > 0) ctx.drawImage(colsC, near, 0, 1, EH, 0, y, x + o, h);
+    if (x1 < vw) ctx.drawImage(colsC, far, 0, 1, EH, x1 - o, y, vw - x1 + o, h);
+    if (x > 0 && y > 0) ctx.drawImage(rowsC, 0, near, 1, 1, 0, 0, x + o, y + o);
+    if (x1 < vw && y > 0) ctx.drawImage(rowsC, EW - 1, near, 1, 1, x1 - o, 0, vw - x1 + o, y + o);
+    if (x > 0 && y1 < vh) ctx.drawImage(rowsC, 0, far, 1, 1, 0, y1 - o, x + o, vh - y1 + o);
+    if (x1 < vw && y1 < vh) ctx.drawImage(rowsC, EW - 1, far, 1, 1, x1 - o, y1 - o, vw - x1 + o, vh - y1 + o);
+    ctx.globalAlpha = 1;
+    ctx.imageSmoothingQuality = "high";
+  }
+
+  // The same colours laid over the frame's own rim, fading out towards the inside. Two sprite lines (opaque, clear)
+  // are stretched over twice the blend depth; the filtering between them gives the fade, which starts at the rim.
+  function drawFeather(k, alpha, x, y, w, h, s) {
+    const b = k * ER;
+    const fx = FEATHER.x * s;
+    const ft = FEATHER.top * s;
+    const fb = FEATHER.bottom * s;
+    ctx.imageSmoothingQuality = "low";
+    ctx.globalAlpha = alpha;
+    if (y > 0) ctx.drawImage(rowsC, 0, b + 2, EW, 2, x, y - ft / 2, w, ft * 2);
+    if (y + h < L.vh) ctx.drawImage(rowsC, 0, b + 6, EW, 2, x, y + h - fb * 1.5, w, fb * 2);
+    if (x > 0) ctx.drawImage(colsC, b + 2, 0, 2, EH, x - fx / 2, y, fx * 2, h);
+    if (x + w < L.vw) ctx.drawImage(colsC, b + 6, 0, 2, EH, x + w - fx * 1.5, y, fx * 2, h);
+    ctx.globalAlpha = 1;
+    ctx.imageSmoothingQuality = "high";
+  }
+
+  function paintBase() {
+    const g = ctx.createLinearGradient(0, 0, 0, L.vh);
+    g.addColorStop(0, "rgb(192,196,197)");
+    g.addColorStop(0.45, "rgb(200,204,205)");
+    g.addColorStop(1, "rgb(" + FLOOR + ")");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, L.vw, L.vh);
+  }
+
+  // The rim of frame `idx` is cross-faded from the key frames on either side of it.
+  let rimA = -1;
+  let rimB = -1;
+  let rimT = 0;
+  function pickRim(idx) {
+    const every = CONFIG.camera.every;
+    const k0 = Math.min(K - 1, Math.floor(idx / every));
+    const k1 = Math.min(K - 1, k0 + 1);
+    rimT = k1 === k0 ? 0 : clamp((idx - KEYS[k0]) / (KEYS[k1] - KEYS[k0]), 0, 1);
+    rimA = nearestEdge(k0);
+    rimB = nearestEdge(k1);
+    if (rimB === rimA || rimT < 0.02) rimB = -1;
+  }
+
+  // Once the contents appear, the floor under the parts (and its shadows) fades to one flat colour:
+  // the labels get a clean surface, and the stage ends in exactly the colour the next section starts with.
+  function drawFloor(g) {
+    const a = clamp(state.lift, 0, 1);
+    const y0 = g.cy + (CONFIG.partBottom + 4 - H / 2) * g.s;
+    const y1 = y0 + Math.max(44, 105 * g.s);
+    const grad = ctx.createLinearGradient(0, y0, 0, y1);
+    grad.addColorStop(0, "rgba(" + FLOOR + ",0)");
+    grad.addColorStop(1, "rgba(" + FLOOR + "," + a + ")");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, y0, L.vw, y1 - y0);
+    ctx.fillStyle = "rgba(" + FLOOR + "," + a + ")";
+    ctx.fillRect(0, y1 - 0.5, L.vw, L.vh - y1 + 1);
+  }
+
+  /* ---------------- Layout + virtual camera ---------------- */
   function sizeCanvas() {
     const vw = stage.clientWidth;
     const vh = stage.clientHeight;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    L.uh = Math.min(vh, ui.clientHeight || vh);
     if (vw === L.vw && vh === L.vh && dpr === L.dpr) return;
     L.vw = vw; L.vh = vh; L.dpr = dpr;
     canvas.width = Math.round(vw * dpr);
@@ -490,132 +801,215 @@ body.is-locked { overflow: hidden; }
     ctx.imageSmoothingQuality = "high";
   }
 
-  function bgAt(y) {
-    const t = clamp(y / (L.vh || 1), 0, 1);
-    const k = t < BG[1][3] ? 0 : 1;
-    const a = BG[k], b = BG[k + 1];
-    const u = (t - a[3]) / (b[3] - a[3]);
-    return [0, 1, 2].map((c) => Math.round(lerp(a[c], b[c], u)));
+  function insets() {
+    const cs = window.getComputedStyle(safe);
+    return { top: parseFloat(cs.paddingTop) || 0, bottom: parseFloat(cs.paddingBottom) || 0 };
   }
 
   function measure() {
-    if (L.mode !== "wide" && L.mode !== "narrow") return;
     sizeCanvas();
-    const { vw, vh } = L;
-    const W = CONFIG.imgW, H = CONFIG.imgH, R = CONFIG.robot;
-    stage.classList.remove("no-head", "compact");
-
-    if (L.mode === "wide") {
-      const s = Math.min(Math.max(vw / W, vh / H), vw / CONFIG.fitWidth);
-      L.sStart = L.sMid = L.sEnd = s;
-      L.cyStart = L.cyMid = vh / 2;
-
-      // The title column stops short of the head.
-      const robotLeft = vw / 2 - (W / 2 - R.x0) * s;
-      stage.style.setProperty("--hero-w", Math.round(clamp(robotLeft - hero.offsetLeft - 40, 220, 520)) + "px");
-      const gap = Math.min(...CONFIG.partX.slice(1).map((x, i) => x - CONFIG.partX[i]));
-      stage.style.setProperty("--label-w", Math.round(Math.min(240, gap * s * 0.92)) + "px");
-
-      const fit = () => {
-        const labelH = Math.max(...parts.map((p) => p.offsetHeight));
-        const cyEnd = Math.min(vh / 2, vh - 20 - labelH - 12 - (CONFIG.partBottom - H / 2) * s);
-        return { cyEnd, partsTop: cyEnd - (H / 2 - CONFIG.partTop) * s };
-      };
-      let f = fit();
-      if (f.partsTop < 8) { stage.classList.add("compact"); f = fit(); }
-      if (f.partsTop < head.offsetTop + head.offsetHeight + 12) stage.classList.add("no-head");
-      L.cyEnd = f.cyEnd;
-    } else {
-      const sEnd = vw / CONFIG.camera.span[CONFIG.camera.span.length - 1];
-      const top = hero.offsetTop + hero.offsetHeight + 20;
-      const avail = Math.max(120, vh - top - 100); // keep the scroll cue clear
-      const sStart = Math.max(sEnd, Math.min(avail / (R.y1 - R.y0), (vw * 0.62) / (R.x1 - R.x0)));
-      L.sStart = sStart;
-      L.sMid = Math.max(sStart, Math.min(vh / H, (vw * 0.8) / (R.x1 - R.x0)));
-      L.sEnd = sEnd;
-      L.cyStart = top + (H / 2 - R.y0) * sStart;
-      L.cyMid = vh / 2;
-
-      const headTop = head.offsetTop;
-      const fit = () => {
-        const above = stage.classList.contains("no-head") ? headTop : head.offsetTop + head.offsetHeight + 22;
-        const cyEnd = above + (H / 2 - CONFIG.partTop) * sEnd;
-        const listTop = cyEnd + (CONFIG.partBottom + 26 - H / 2) * sEnd + 22;
-        return { cyEnd, bottom: listTop + list.offsetHeight };
-      };
-      let f = fit();
-      if (f.bottom > vh - 12) { stage.classList.add("no-head"); f = fit(); }
-      if (f.bottom > vh - 12) { stage.classList.add("compact"); f = fit(); }
-      L.cyEnd = f.cyEnd;
+    const vw = L.vw;
+    const vh = L.uh;
+    if (!vw || !vh) return;
+    const mode = wideQuery.matches ? "wide" : "narrow";
+    if (mode !== L.mode) {
+      parts.forEach((p) => { p.style.transform = ""; });
+      list.style.transform = "";
     }
+    L.mode = mode;
+    stage.dataset.layout = mode;
+    stage.classList.remove("no-head", "compact");
+    if (mode === "wide") measureWide(vw, vh); else measureNarrow(vw, vh);
+    L.placeDirty = true;
     invalidate();
+  }
+
+  function measureWide(vw, vh) {
+    const HD = CONFIG.head;
+    const inset = insets();
+    // Show the frame as large as possible while the whole disassembly stays on screen.
+    const s = Math.min(Math.max(vw / W, vh / H), vw / CONFIG.fitW, vh / CONFIG.fitH);
+    L.sSeq = L.sStart = L.sMid = s;
+    L.cyStart = L.cyMid = vh / 2;
+
+    // Title column: everything left of the head. If that gets too tight, the head starts a little to the right.
+    const heroLeft = hero.offsetLeft;
+    const gap = clamp(vw * 0.03, 24, 56);
+    const want = Math.min(320, vw * 0.36);
+    const headLeft = vw / 2 - (W / 2 - HD.x0) * s;
+    const room = vw - 16 - (vw / 2 + (HD.x1 - W / 2) * s);
+    const pan = clamp(heroLeft + want + gap - headLeft, 0, Math.max(0, room));
+    L.cxStart = vw / 2 + pan;
+    stage.style.setProperty("--hero-w", px(clamp(headLeft + pan - heroLeft - gap, 160, 640)));
+
+    // Contents: heading, the five parts, a label under each. Zoom out just enough for all three to fit,
+    // then centre them on the screen as one group.
+    const partsH = CONFIG.partBottom - CONFIG.partTop;
+    const minGap = Math.min.apply(null, CONFIG.partX.slice(1).map((x, i) => x - CONFIG.partX[i]));
+    const labelW = (sc) => px(Math.min(340, minGap * sc * 0.94));
+    const topPad = inset.top + clamp(vh * 0.04, 10, 40);
+    const bottomPad = inset.bottom + clamp(vh * 0.035, 14, 40);
+    const headGap = clamp(vh * 0.028, 12, 30);
+    L.labelGap = clamp(vh * 0.012, 4, 14);
+    if (vh < 500) stage.classList.add("no-head");
+    const headRoom = () => (stage.classList.contains("no-head") ? 0 : head.offsetHeight + headGap);
+    const labelRoom = () => L.labelGap + Math.max.apply(null, parts.map((p) => p.offsetHeight));
+
+    const fit = () => {
+      let sEnd = s;
+      for (let k = 0; k < 5; k++) {
+        stage.style.setProperty("--label-w", labelW(sEnd));
+        const next = Math.min(s, (vh - topPad - headRoom() - labelRoom() - bottomPad) / partsH);
+        const settled = Math.abs(next - sEnd) < 0.004;
+        sEnd = Math.min(sEnd, next);
+        if (settled) break;
+      }
+      return sEnd;
+    };
+    let fitted = fit();
+    if (fitted < s * 0.86) { stage.classList.add("compact"); fitted = fit(); }
+    if (fitted < s * 0.78 && !stage.classList.contains("no-head")) { stage.classList.add("no-head"); fitted = fit(); }
+    const sEnd = Math.max(fitted, s * 0.5);
+    stage.style.setProperty("--label-w", labelW(sEnd));
+    const above = headRoom();
+    const free = Math.max(0, vh - topPad - bottomPad - above - partsH * sEnd - labelRoom());
+    const air = above ? Math.min(free * 0.22, headGap * 1.5) : 0;     // spare room: a little more under the heading,
+    const top = topPad + (free - air) * 0.46;                        // the rest shared above and below the group
+    stage.style.setProperty("--head-top", px(top));
+    L.sEnd = sEnd;
+    L.cyEnd = top + above + air + (H / 2 - CONFIG.partTop) * sEnd;
+    L.cxEnd = vw / 2 - (CONFIG.partsCenter - W / 2) * sEnd;
+  }
+
+  function measureNarrow(vw, vh) {
+    const HD = CONFIG.head;
+    const cam = CONFIG.camera;
+    const inset = insets();
+    const sEnd = vw / cam.span[cam.span.length - 1];
+    const headH = HD.y1 - HD.y0;
+    const headW = HD.x1 - HD.x0;
+
+    // Title on top, the head as large as the space under it allows.
+    const top = hero.offsetTop + hero.offsetHeight + clamp(vh * 0.03, 14, 40);
+    const under = inset.bottom + clamp(vh * 0.075, 30, 90);            // room for the shadow under the neck
+    const avail = Math.max(160, vh - top - under);
+    const sStart = Math.max(sEnd, Math.min(avail / headH, (vw * 0.72) / headW));
+    L.sStart = L.sSeq = sStart;
+    L.sMid = Math.max(sStart, Math.min((vh * 0.62) / headH, (vw * 0.86) / headW));
+    L.cxStart = L.cxEnd = vw / 2;
+    L.cyStart = top + Math.max(0, avail - headH * sStart) * 0.35 + (H / 2 - HD.y0) * sStart;
+    L.cyMid = vh / 2 - ((HD.y0 + HD.y1) / 2 - H / 2) * L.sMid;
+
+    // Contents: heading, the row of parts with their badges, then the list; centred as one block.
+    const rowH = (CONFIG.partBottom - CONFIG.partTop) * sEnd;
+    const m = markers[0].offsetWidth || 24;
+    const g1 = clamp(vh * 0.022, 10, 26);
+    const g2 = Math.round(m * 0.35);
+    const g3 = clamp(vh * 0.024, 12, 30);
+    const topMin = inset.top + clamp(vh * 0.024, 14, 30);
+    const bottomMin = inset.bottom + clamp(vh * 0.024, 12, 30);
+    const headH2 = () => (stage.classList.contains("no-head") ? 0 : head.offsetHeight + g1);
+    const total = () => headH2() + rowH + g2 + m + g3 + list.offsetHeight;
+    let t = total();
+    if (topMin + t + bottomMin > vh) { stage.classList.add("compact"); t = total(); }
+    if (topMin + t + bottomMin > vh) { stage.classList.add("no-head"); t = total(); }
+    const blockTop = topMin + Math.max(0, vh - topMin - bottomMin - t) * 0.4;
+    stage.style.setProperty("--head-top", px(blockTop));
+    L.sEnd = sEnd;
+    L.cyEnd = blockTop + headH2() + (H / 2 - CONFIG.partTop) * sEnd;
+    L.markOff = g2 + m / 2;
+    L.listOff = g2 + m + g3;
+
+    // A separator dot that would end a line is hidden (it keeps its width, so nothing moves).
+    parts.forEach((p) => {
+      const items = p.querySelectorAll("li");
+      items.forEach((li, i) => {
+        const next = items[i + 1];
+        li.classList.toggle("eol", !!next && next.offsetTop > li.offsetTop + 2);
+      });
+    });
+  }
+
+  // Narrow-screen camera track: interpolates the measured key frames at any (fractional) frame.
+  function track(values, f) {
+    const n = values.length - 1;
+    const k = Math.min(n - 1, Math.floor(f / CONFIG.camera.every));
+    const u = clamp((f - KEYS[k]) / (KEYS[k + 1] - KEYS[k]), 0, 1);
+    return lerp(values[k], values[k + 1], u);
   }
 
   function camera() {
     if (L.mode === "wide") {
-      return { s: L.sStart, cx: L.vw / 2, cy: lerp(L.cyStart, L.cyEnd, state.lift) };
+      return {
+        s: lerp(L.sSeq, L.sEnd, state.lift),
+        cx: lerp(lerp(L.cxStart, L.vw / 2, state.settle), L.cxEnd, state.lift),
+        cy: lerp(L.cyStart, L.cyEnd, state.lift),
+      };
     }
     // Narrow: push in while the title leaves, then pull back and pan so the action always fits the width.
+    const cam = CONFIG.camera;
     const s1 = L.sStart * Math.pow(L.sMid / L.sStart, state.settle);
-    const s = Math.min(s1, L.vw / track(CONFIG.camera.span, state.frame));
-    const cx = L.vw / 2 - (track(CONFIG.camera.center, state.frame) - CONFIG.imgW / 2) * s;
-    const cy = lerp(lerp(L.cyStart, L.cyMid, state.settle), L.cyEnd, state.lift);
-    return { s, cx, cy };
+    const s = Math.min(s1, L.vw / track(cam.span, state.frame));
+    return {
+      s: s,
+      cx: L.vw / 2 - (track(cam.center, state.frame) - W / 2) * s,
+      cy: lerp(lerp(L.cyStart, L.cyMid, state.settle), L.cyEnd, state.lift),
+    };
   }
 
   let shown = -1;
+  let hasFrame = false;
   function render() {
-    if (!L.vw || (L.mode !== "wide" && L.mode !== "narrow")) return;
+    if (!L.vw) return;
     const g = camera();
-    const w = CONFIG.imgW * g.s, h = CONFIG.imgH * g.s;
-    const x = g.cx - w / 2, y = g.cy - h / 2;
-
-    const grad = ctx.createLinearGradient(0, 0, 0, L.vh);
-    BG.forEach((c) => grad.addColorStop(c[3], "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")"));
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, L.vw, L.vh);
-
+    const w = W * g.s;
+    const h = H * g.s;
+    const x = g.cx - w / 2;
+    const y = g.cy - h / 2;
     const idx = Math.round(state.frame);
     const img = frameImage(idx);
-    if (img) {
+    if (!img) {
+      paintBase();
+    } else {
+      const open = x > 0 || y > 0 || x + w < L.vw || y + h < L.vh;
+      if (open) {
+        pickRim(idx);
+        if (rimA < 0) paintBase();
+        else {
+          drawBands(rimA, 1, x, y, w, h);
+          if (rimB >= 0) drawBands(rimB, rimT, x, y, w, h);
+        }
+      }
       ctx.drawImage(img, x, y, w, h);
-      feather(y, h);
+      if (open && rimA >= 0) {
+        drawFeather(rimA, 1, x, y, w, h, g.s);
+        if (rimB >= 0) drawFeather(rimB, rimT, x, y, w, h, g.s);
+      }
+      if (state.lift > 0.002) drawFloor(g);
+      warm(idx);
+      if (!hasFrame) { hasFrame = true; stage.classList.add("has-frame"); }
     }
     if (idx !== shown) {
       shown = idx;
-      hudCount.textContent = pad3(idx + 1) + " / " + pad3(CONFIG.frameCount);
+      hudCount.textContent = pad3(idx + 1) + " / " + pad3(N);
     }
-    place(g);
-  }
-
-  // Where the frame stops short of the viewport, fade it into the page background.
-  function feather(y, h) {
-    const f = Math.min(90, h * 0.12);
-    if (y > 0.5) {
-      const c = bgAt(y).join(",");
-      const g = ctx.createLinearGradient(0, y, 0, y + f);
-      g.addColorStop(0, "rgba(" + c + ",1)"); g.addColorStop(1, "rgba(" + c + ",0)");
-      ctx.fillStyle = g; ctx.fillRect(0, y - 1, L.vw, f + 1);
-    }
-    if (y + h < L.vh - 0.5) {
-      const c = bgAt(y + h).join(",");
-      const g = ctx.createLinearGradient(0, y + h - f, 0, y + h);
-      g.addColorStop(0, "rgba(" + c + ",0)"); g.addColorStop(1, "rgba(" + c + ",1)");
-      ctx.fillStyle = g; ctx.fillRect(0, y + h - f, L.vw, f + 1);
+    if (state.lift > 0 || L.placeDirty) {
+      L.placeDirty = false;
+      place(g);
     }
   }
 
   // Labels and badges follow the same camera as the canvas.
   function place(g) {
-    const X = (px) => g.cx + (px - CONFIG.imgW / 2) * g.s;
-    const Y = (py) => g.cy + (py - CONFIG.imgH / 2) * g.s;
+    const X = (p) => g.cx + (p - W / 2) * g.s;
+    const base = g.cy + (CONFIG.partBottom - H / 2) * g.s;
     if (L.mode === "wide") {
-      const top = (Y(CONFIG.partBottom) + 12).toFixed(1);
+      const top = (base + L.labelGap).toFixed(1);
       parts.forEach((p, i) => { p.style.transform = "translate3d(" + X(CONFIG.partX[i]).toFixed(1) + "px," + top + "px,0)"; });
     } else {
-      const my = Y(CONFIG.partBottom + 26);
-      markers.forEach((m, i) => { m.style.left = X(CONFIG.partX[i]).toFixed(1) + "px"; m.style.top = my.toFixed(1) + "px"; });
-      list.style.transform = "translate3d(0," + (my + 22).toFixed(1) + "px,0)";
+      const my = (base + L.markOff).toFixed(1) + "px";
+      markers.forEach((m, i) => { m.style.left = X(CONFIG.partX[i]).toFixed(1) + "px"; m.style.top = my; });
+      list.style.transform = "translate3d(0," + (base + L.listOff).toFixed(1) + "px,0)";
     }
   }
 
@@ -623,48 +1017,84 @@ body.is-locked { overflow: hidden; }
   gsap.ticker.add(() => { if (dirty) { dirty = false; render(); } });
 
   /* ---------------- Presentation mode ---------------- */
-  // Arrow keys, Page Up/Down, Space and most clickers step through the talk's beats. F toggles fullscreen.
+  // Arrow keys, Page Up/Down, Space, Enter and most clickers step through the talk. F toggles fullscreen.
   let smoother = null;
-  let beats = () => [];
+  let mainTl = null;
   let target = null;
+  let goTween = null;
 
   const currentY = () => (smoother ? smoother.scrollTop() : window.scrollY);
 
-  function go(y) {
-    target = y;
-    const duration = clamp((Math.abs(y - currentY()) / window.innerHeight) * 0.6, 0.5, 3.2);
-    const done = () => { target = null; };
-    if (smoother) gsap.to(smoother, { scrollTop: y, duration, ease: "power2.inOut", overwrite: true, onComplete: done });
-    else if (hasScrollTo) gsap.to(window, { scrollTo: { y, autoKill: false }, duration, ease: "power2.inOut", overwrite: true, onComplete: done });
-    else { window.scrollTo({ top: y, behavior: "smooth" }); done(); }
+  function beats() {
+    if (!mainTl || !mainTl.scrollTrigger) return [];
+    const st = mainTl.scrollTrigger;
+    const at = (label) => Math.round(st.start + (st.end - st.start) * (mainTl.labels[label] / mainTl.duration()));
+    const out = [0];
+    if (!stage.classList.contains("no-head")) out.push(at("contents-shown"));
+    parts.forEach((p, i) => out.push(at("part-" + i)));
+    out.push(Math.round(ScrollTrigger.maxScroll(window)));
+    return out;
   }
 
+  function stopGo() {
+    if (goTween) goTween.kill();
+    goTween = null;
+    target = null;
+  }
+
+  function go(y) {
+    stopGo();
+    const from = currentY();
+    const screens = Math.abs(y - from) / window.innerHeight;
+    // Forward plays the scene at a watchable pace; going back is quicker.
+    const duration = y > from ? clamp(screens * 1.75, 0.6, 6.5) : clamp(screens * 0.7, 0.5, 2.5);
+    target = y;
+    if (smoother) goTween = gsap.to(smoother, { scrollTop: y, duration: duration, ease: "power2.inOut", onComplete: stopGo });
+    else if (hasScrollTo) goTween = gsap.to(window, { scrollTo: { y: y, autoKill: false }, duration: duration, ease: "power2.inOut", onComplete: stopGo });
+    else { window.scrollTo(0, y); target = null; }
+  }
+  // Scrolling by hand takes over from a step that is still playing.
+  ["wheel", "touchstart"].forEach((type) => window.addEventListener(type, stopGo, { passive: true }));
+
   function step(dir) {
-    const list = beats();
-    if (!list.length) return;
+    const stops = beats();
+    if (!stops.length) return;
     const y = target === null ? currentY() : target;
     let i;
     if (dir === -Infinity) i = 0;
-    else if (dir === Infinity) i = list.length - 1;
-    else if (dir > 0) { i = list.findIndex((p) => p > y + 4); if (i < 0) i = list.length - 1; }
-    else { i = 0; for (let k = list.length - 1; k >= 0; k--) { if (list[k] < y - 4) { i = k; break; } } }
-    go(list[i]);
+    else if (dir === Infinity) i = stops.length - 1;
+    else if (dir > 0) { i = stops.findIndex((p) => p > y + 4); if (i < 0) i = stops.length - 1; }
+    else { i = 0; for (let k = stops.length - 1; k >= 0; k--) { if (stops[k] < y - 4) { i = k; break; } } }
+    go(stops[i]);
   }
 
   function toggleFullscreen() {
-    if (!document.fullscreenElement) { if (root.requestFullscreen) root.requestFullscreen().catch(() => {}); }
-    else if (document.exitFullscreen) document.exitFullscreen();
+    const el = document.fullscreenElement || document.webkitFullscreenElement;
+    if (!el) {
+      const request = root.requestFullscreen || root.webkitRequestFullscreen;
+      if (request) { const p = request.call(root); if (p && p.catch) p.catch(() => {}); }
+    } else {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) exit.call(document);
+    }
   }
+  // ScrollTrigger ignores resizes while something is fullscreen, so the pinned stage is re-measured from here.
+  const isFullscreen = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const refreshSoon = gsap.delayedCall(0.12, () => ScrollTrigger.refresh()).pause();
+  const onFullscreen = () => refreshSoon.restart(true);
+  document.addEventListener("fullscreenchange", onFullscreen);
+  document.addEventListener("webkitfullscreenchange", onFullscreen);
+  window.addEventListener("resize", () => { if (isFullscreen()) refreshSoon.restart(true); });
 
   window.addEventListener("keydown", (e) => {
-    if (!revealed || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (!unlocked || e.altKey || e.ctrlKey || e.metaKey) return;
     const t = e.target;
     if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(t.tagName))) return;
     if (e.key === "f" || e.key === "F") { toggleFullscreen(); return; }
     let dir = 0;
-    if (e.key === " ") dir = e.shiftKey ? -1 : 1;
-    else if (["ArrowRight", "ArrowDown", "PageDown", "Enter"].includes(e.key)) dir = 1;
-    else if (["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) dir = -1;
+    if (e.key === " " || e.key === "Spacebar") dir = e.shiftKey ? -1 : 1;
+    else if (["ArrowRight", "ArrowDown", "PageDown", "Enter"].indexOf(e.key) >= 0) dir = 1;
+    else if (["ArrowLeft", "ArrowUp", "PageUp"].indexOf(e.key) >= 0) dir = -1;
     else if (e.key === "Home") dir = -Infinity;
     else if (e.key === "End") dir = Infinity;
     if (!dir) return;
@@ -675,154 +1105,161 @@ body.is-locked { overflow: hidden; }
   /* ---------------- Timelines ---------------- */
   let intro = null;
   let initDone = false;
-  let started = false;
   let revealed = false;
+  let unlocked = false;
+  let unlockTimer = 0;
 
-  function begin() {
-    started = true;
-    clearTimeout(skipTimer);
-    if (initDone) reveal();
+  function build() {
+    // Inertial scrolling for mice and trackpads; touch keeps native scrolling. Must exist before any ScrollTrigger.
+    if (hasSmoother && FINE && !REDUCED) {
+      smoother = ScrollSmoother.create({ wrapper: "#smooth-wrapper", content: "#smooth-content", smooth: 1.1, smoothTouch: false, effects: false });
+      smoother.paused(true);
+    }
+
+    // Words rise out of a mask; without SplitText the whole line fades up instead.
+    const rise = (tl, el, at, stagger, duration) => {
+      const s = hasSplit ? SplitText.create(el, { type: "words", mask: "words" }) : null;
+      if (s) tl.from(s.words, { yPercent: 110, duration: duration, stagger: stagger, ease: "expo.out" }, at);
+      else tl.fromTo(el, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: duration, ease: "expo.out" }, at);
+    };
+
+    // Intro: plays once, when the first frame is on screen.
+    intro = gsap.timeline({ paused: true, defaults: { ease: "expo.out" } });
+    intro.from("#hero .eyebrow", { opacity: 0, y: 12, duration: 0.9 }, 0);
+    rise(intro, $("#hero-title"), 0.08, 0.045, 1.2);
+    intro.from("#hero .hero-note", { opacity: 0, y: 12, duration: 0.9 }, 0.5)
+         .from(cue, { opacity: 0, y: 10, duration: 0.9 }, 0.7);
+
+    // Robot scene: one scrubbed timeline. Its units are arbitrary; ScrollTrigger maps them onto the pinned distance.
+    const SEQ = 24;
+    const tl = gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: {
+        trigger: "#sequence",
+        start: "top top",
+        end: () => "+=" + Math.round((stage.offsetHeight || window.innerHeight) * CONFIG.scrollLength),
+        pin: stage,
+        scrub: 0.8,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
+    });
+    mainTl = tl;
+
+    tl.addLabel("title", 0)
+      .to(state, { frame: LAST, duration: SEQ, onUpdate: invalidate }, 0)
+      .to(hudFill, { scaleX: 1, duration: SEQ }, 0)
+      .to(hero, { opacity: 0, y: () => -0.06 * L.uh, duration: 2, ease: "power2.in" }, 0.15)
+      .fromTo(hud, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8 }, 0.6)
+      .to(state, { settle: 1, duration: 2.6, ease: "power1.inOut", onUpdate: invalidate }, 0.9);
+
+    tl.addLabel("contents", SEQ - 0.3)
+      .to(hud, { autoAlpha: 0, duration: 0.5 }, "contents")
+      .to(state, { lift: 1, duration: 1.4, ease: "power2.inOut", onUpdate: invalidate }, "contents")
+      .fromTo("#contents-head .eyebrow", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "contents+=0.6");
+    rise(tl, $("#contents-title"), "contents+=0.7", 0.08, 0.9);
+    tl.addLabel("contents-shown", "contents+=1.6");
+
+    // The five parts, one after the other. Each is complete before the next begins, so every step of the
+    // presentation mode stops on a finished picture.
+    parts.forEach((p, i) => {
+      const at = 1.8 + i * 1.05;
+      const pos = (d) => "contents+=" + (at + d).toFixed(2);
+      tl.fromTo(p.querySelector(".part-line"), { "--line": 0 }, { "--line": 1, duration: 0.45, ease: "power3.inOut" }, pos(0))
+        .fromTo(markers[i], { autoAlpha: 0, scale: 0.4 }, { autoAlpha: 1, scale: 1, duration: 0.45, ease: "back.out(2.2)" }, pos(0))
+        .fromTo(p.querySelector(".num"), { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, pos(0.08));
+      rise(tl, p.querySelector("h3"), pos(0.14), 0.045, 0.7);
+      tl.fromTo(p.querySelectorAll("li"), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.05, ease: "power3.out" }, pos(0.34))
+        .addLabel("part-" + i, pos(1));
+    });
+    tl.to({}, { duration: 1.2 }, "part-" + (parts.length - 1));   // a beat on the finished contents before the page moves on
+
+    // Presenters: a short reveal that plays once as the section comes into view.
+    const ctl = gsap.timeline({
+      defaults: { ease: "expo.out" },
+      scrollTrigger: { trigger: credits, start: "top 65%", toggleActions: "play none none reverse" },
+    });
+    ctl.fromTo("#credits-title", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.8 }, 0);
+    $$(".names li", credits).forEach((el, i) => rise(ctl, el, 0.1 + i * 0.16, 0.06, 1.2));
+    ctl.fromTo(".credits-rule", { scaleX: 0 }, { scaleX: 1, duration: 1, ease: "power3.inOut" }, 0.45)
+       .fromTo(".thanks", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.8 }, 0.6);
+
+    // Every refresh (resize, rotation, fullscreen, late fonts) re-measures the layout. The pinned distance changes
+    // with the window, so afterwards the page is put back at the same point of the talk.
+    let keep = null;
+    ScrollTrigger.addEventListener("refreshInit", () => {
+      const st = tl.scrollTrigger;
+      const y = currentY();
+      if (!unlocked || !(st.end > st.start) || y <= st.start + 1) keep = null;
+      else keep = y < st.end ? { at: (y - st.start) / (st.end - st.start) } : { past: y - st.end };
+    });
+    ScrollTrigger.addEventListener("refresh", () => {
+      measure();
+      if (!keep) return;
+      const st = tl.scrollTrigger;
+      const y = Math.round("at" in keep ? st.start + keep.at * (st.end - st.start) : st.end + keep.past);
+      keep = null;
+      if (Math.abs(y - currentY()) < 2) return;
+      stopGo();
+      st.scroll(y);
+      st.update();
+      const scrub = st.getTween();
+      if (scrub) scrub.progress(1);         // no catching up: the picture is simply where it was
+    });
   }
 
-  function reveal() {
-    if (revealed) return;
+  function maybeReveal() {
+    if (revealed || !initDone || !firstDone) return;
     revealed = true;
-    gsap.to(loader, { autoAlpha: 0, duration: 0.7, ease: "power2.out" });
+    clearTimeout(loaderTimer);
+    loader.classList.remove("is-visible");
+    intro.play();
+    invalidate();
+    unlockTimer = setTimeout(unlock, CONFIG.unlockAfter);
+    maybeUnlock();
+  }
+
+  function maybeUnlock() {
+    if (revealed && keysDone) unlock();
+  }
+
+  function unlock() {
+    if (unlocked) return;
+    unlocked = true;
+    clearTimeout(unlockTimer);
     body.classList.remove("is-locked");
     if (smoother) smoother.paused(false);
+    cueLabel.textContent = FINE ? "Scroll or press →" : "Scroll";
     ScrollTrigger.refresh();
-    if (intro) intro.play();
-    invalidate();
   }
 
-  function init() {
-    const mm = gsap.matchMedia();
+  // Build once the web fonts are in, so every measured text size is final. If they take too long the page starts
+  // without them and is measured again when they arrive.
+  const fontsReady = document.fonts && document.fonts.load
+    ? Promise.race([
+        Promise.all([document.fonts.load('600 48px "Geist"'), document.fonts.load('500 12px "Geist Mono"')])
+          .then(() => document.fonts.ready).then(() => true),
+        new Promise((r) => setTimeout(() => r(false), 2000)),
+      ]).catch(() => false)
+    : Promise.resolve(true);
 
-    mm.add({ wide: WIDE, narrow: NARROW, fine: FINE }, (context) => {
-      const { wide, fine } = context.conditions;
-      L.mode = wide ? "wide" : "narrow";
-      stage.dataset.layout = L.mode;
-      parts.forEach((p) => { p.style.transform = ""; });
-      list.style.transform = "";
-      cueLabel.textContent = fine ? "Scroll or press →" : "Scroll";
-
-      // Inertial scrolling on desktop mice and trackpads; touch keeps native scrolling.
-      // Created before any ScrollTrigger, as ScrollSmoother requires.
-      if (hasSmoother && wide && fine) {
-        smoother = ScrollSmoother.create({ wrapper: "#smooth-wrapper", content: "#smooth-content", smooth: 1.1, smoothTouch: false, effects: false });
-        if (!revealed) smoother.paused(true);
-      }
-
-      const splits = [];
-      const split = (el, type) => {
-        if (!hasSplit) return null;
-        const s = SplitText.create(el, type === "chars" ? { type: "words,chars", mask: "words" } : { type: "words", mask: "words" });
-        splits.push(s);
-        return s;
-      };
-      // Words rise out of a mask; without SplitText the whole line fades up instead.
-      const rise = (tl, el, at, stagger, duration) => {
-        const s = split(el);
-        if (s) tl.from(s.words, { yPercent: 110, duration, stagger, ease: "expo.out" }, at);
-        else tl.fromTo(el, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration, ease: "expo.out" }, at);
-      };
-
-      // Intro: plays once when the frames are ready.
-      const introTl = gsap.timeline({ paused: true, defaults: { ease: "expo.out" } });
-      introTl.from("#hero .eyebrow", { autoAlpha: 0, y: 12, duration: 0.9 }, 0);
-      rise(introTl, $("#hero-title"), 0.08, 0.045, 1.2);
-      introTl.from("#hero .hero-note", { autoAlpha: 0, y: 12, duration: 0.9 }, 0.5)
-             .from(".cue-inner", { autoAlpha: 0, y: 10, duration: 0.9 }, 0.75);
-      if (revealed) introTl.progress(1);
-      intro = introTl;
-
+  window.__booted = true;
+  pump();
+  fontsReady.then((inTime) => {
+    try {
+      build();
       measure();
-
-      /* --- Robot scene: one scrubbed timeline; units are arbitrary, ScrollTrigger maps them onto the pin --- */
-      const SEQ = 24;
-      const tl = gsap.timeline({
-        defaults: { ease: "none" },
-        scrollTrigger: {
-          trigger: "#sequence",
-          start: "top top",
-          end: () => "+=" + Math.round(window.innerHeight * CONFIG.scrollLength),
-          pin: stage,
-          scrub: 0.8,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          onRefresh: measure,
-        },
-      });
-
-      tl.addLabel("title", 0)
-        .to(state, { frame: LAST, duration: SEQ, onUpdate: invalidate }, 0)
-        .to(hudFill, { scaleX: 1, duration: SEQ }, 0)
-        .to(cue, { autoAlpha: 0, duration: 0.5 }, 0)
-        .to(hero, { autoAlpha: 0, y: () => -0.06 * L.vh, duration: 2.0, ease: "power2.in" }, 0.15)
-        .fromTo(hud, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8 }, 0.6);
-      if (!wide) tl.to(state, { settle: 1, duration: 2.6, ease: "power1.inOut", onUpdate: invalidate }, 0.9);
-
-      tl.addLabel("contents", SEQ - 0.3)
-        .to(hud, { autoAlpha: 0, duration: 0.5 }, "contents")
-        .to(state, { lift: 1, duration: 1.4, ease: "power2.inOut", onUpdate: invalidate }, "contents")
-        .fromTo("#contents-head .eyebrow", { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power3.out" }, "contents+=0.6");
-      rise(tl, $("#contents-title"), "contents+=0.7", 0.08, 0.9);
-      tl.addLabel("contents-shown", "contents+=1.6");
-
-      parts.forEach((p, i) => {
-        const at = 1.8 + i * 0.85;
-        const pos = (d) => "contents+=" + (at + d).toFixed(2);
-        const line = p.querySelector(".part-line");
-        tl.fromTo(line, wide ? { scaleY: 0 } : { scaleX: 0 }, wide ? { scaleY: 1, duration: 0.5, ease: "power3.inOut" } : { scaleX: 1, duration: 0.6, ease: "power3.inOut" }, pos(0))
-          .fromTo(p.querySelector(".num"), { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" }, pos(0.15));
-        rise(tl, p.querySelector("h3"), pos(0.2), 0.05, 0.9);
-        tl.fromTo(p.querySelectorAll("li"), { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.08, ease: "power3.out" }, pos(0.45));
-        if (!wide) tl.fromTo(markers[i], { autoAlpha: 0, scale: 0.4 }, { autoAlpha: 1, scale: 1, duration: 0.5, ease: "back.out(2.2)" }, pos(0));
-        tl.addLabel("part-" + i, pos(1.05));
-      });
-      tl.to({}, { duration: 1.0 }); // a beat on the finished contents before the page moves on
-
-      /* --- Presenters: a short reveal that plays once as the section comes into view (no pinning) --- */
-      const names = $$(".names li", credits);
-      const ctl = gsap.timeline({
-        defaults: { ease: "expo.out" },
-        scrollTrigger: { trigger: credits, start: "top 65%", toggleActions: "play none none reverse" },
-      });
-      ctl.fromTo("#credits-title", { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.8 }, 0);
-      names.forEach((el, i) => rise(ctl, el, 0.1 + i * 0.16, 0.06, 1.2));
-      ctl.fromTo(".credits-rule", { scaleX: 0 }, { scaleX: 1, duration: 1, ease: "power3.inOut" }, 0.45)
-         .fromTo(".thanks", { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.8 }, 0.6);
-
-      // Beats for presentation mode, read from the timelines so they follow any resize.
-      const posOf = (timeline, label) => {
-        const st = timeline.scrollTrigger;
-        return Math.round(st.start + (st.end - st.start) * (timeline.labels[label] / timeline.duration()));
-      };
-      beats = () => [
-        0,
-        posOf(tl, "contents-shown"),
-        ...parts.map((p, i) => posOf(tl, "part-" + i)),
-        Math.round(ScrollTrigger.maxScroll(window)),   // the presenters page
-      ];
-
-      return () => {
-        splits.forEach((s) => s.revert());
-        stage.classList.remove("no-head", "compact");
-        if (smoother) { smoother.kill(); smoother = null; }
-        beats = () => [];
-      };
-    });
-
-    window.addEventListener("resize", measure);
+    } catch (e) {
+      if (window.console) console.error(e);
+      goStatic();                           // never leave the page half-built
+      return;
+    }
     initDone = true;
-    if (started) reveal();
-  }
-
-  // Split text only after the web font is in, so word widths are final.
-  const fontsReady = document.fonts && document.fonts.ready
-    ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))])
-    : Promise.resolve();
-  fontsReady.then(init);
+    maybeReveal();
+    // A first frame that never arrives must not keep the title hidden.
+    setTimeout(() => { if (!firstDone) { firstDone = true; maybeReveal(); } }, 5000);
+    if (!inTime && document.fonts.ready) document.fonts.ready.then(() => ScrollTrigger.refresh());
+  });
 })();
 </script>
 </body>
