@@ -126,13 +126,17 @@
       ];
     },
 
-    // What is AI: a small neural network
+    // What is AI: a small neural network, its layers standing as rings one behind the other
     network(r) {
-      const xs = [-1.2, -0.4, 0.4, 1.2];
+      const xs = [-1.25, -0.42, 0.42, 1.25];
       const counts = [4, 6, 6, 3];
+      const radius = [0.6, 0.92, 0.92, 0.5];
       const layers = xs.map((x, l) => {
         const out = [];
-        for (let i = 0; i < counts[l]; i++) out.push([x, (i - (counts[l] - 1) / 2) * 0.43, ((i + l) % 2 ? 1 : -1) * 0.17]);
+        for (let i = 0; i < counts[l]; i++) {
+          const a = (i / counts[l]) * TAU + l * 0.5;
+          out.push([x, radius[l] * Math.cos(a), radius[l] * Math.sin(a)]);
+        }
         return out;
       });
       const nodes = [].concat.apply([], layers);
@@ -316,7 +320,7 @@
       ];
     },
   };
-  const SPIN = { globe: 1, helix: 1, orbit: 1, gem: 1 };   // these keep turning; the others only sway
+  const SPIN = { globe: 1, network: 1, helix: 1, orbit: 1, gem: 1 };   // these keep turning; the others sway from side to side
 
   // Fill n points (x, y, z, accent) from a figure's components, then shuffle so every flight path is different.
   function build(name, n, seed) {
@@ -450,6 +454,7 @@
     let wasSpinning = false;
     let angle = 0;
     let last = 0;
+    let twist = 0;         // extra full turns, one for every step sideways inside a slide
     const SIZE = 0.0145;   // diameter of a point, in figure units
     let box = { x: 0.5, y: 0.5, w: 0.5, h: 0.7 };
     const look = { x: 0, y: 0 };
@@ -497,6 +502,8 @@
         const eased = m * m * (3 - 2 * m);
         spin = lerp(SPIN[names[i]] ? 1 : 0, SPIN[names[Math.min(names.length - 1, i + 1)]] ? 1 : 0, eased);
       },
+      // Extra turns around the vertical axis: 1 is one full turn
+      twist(v) { twist = v; },
       // time in seconds; pointer in -1…1 on both axes
       render(time, pointer) {
         if (!width) return;
@@ -505,10 +512,11 @@
         // Round figures keep turning; when one gives way to a figure that faces the viewer, the turn unwinds with the change.
         const dt = Math.min(0.1, Math.max(0, time - last));
         last = time;
-        if (spin > 0.999) { angle += dt * 0.16; wasSpinning = true; }
+        if (spin > 0.999) { angle += dt * 0.2; wasSpinning = true; }
         else if (spin < 0.001) { angle = 0; wasSpinning = false; }
         else if (wasSpinning) { angle = ((((angle + Math.PI) % TAU) + TAU) % TAU) - Math.PI; wasSpinning = false; }
-        group.rotation.y = Math.sin(time * 0.31) * 0.3 * (1 - spin * 0.6) + angle * spin + look.x * 0.28;
+        // Swaying figures move about as fast as the turning ones, so no slide feels slower than the one before.
+        group.rotation.y = Math.sin(time * 0.42) * 0.52 * (1 - spin) + angle * spin + twist * TAU + look.x * 0.28;
         group.rotation.x = 0.1 + Math.sin(time * 0.23) * 0.05 + look.y * 0.14;
         material.uniforms.uTime.value = time;
         renderer.render(scene, camera);

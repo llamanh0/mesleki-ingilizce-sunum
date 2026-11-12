@@ -243,18 +243,40 @@ body.is-locked { overflow: hidden; }
 .timeline li { display: grid; grid-template-columns: 3.4em minmax(0, 1fr); column-gap: .8em; align-items: baseline; }
 .timeline .year { font-family: var(--font-mono); font-size: .8em; font-weight: 500; color: var(--copper); }
 .cols { margin: 1.5em 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(18px, 2.6vw, 48px); }
-.cols h3, .prompt h3 { margin: 0 0 .9em; font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--copper); }
+.cols h3 { margin: 0 0 .9em; font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--copper); }
 .cols .points { margin: 0; }
-.prompts { margin: 1.5em 0 0; display: grid; gap: clamp(10px, 1.6vh, 18px); }
-.prompt { padding: clamp(12px, 1.9vh, 20px) clamp(14px, 1.4vw, 24px); border: 1px solid var(--rule); border-radius: 10px; background: rgba(240, 242, 242, .5); }
-.prompt h3 { margin-bottom: .6em; color: var(--ink-2); }
-.prompt.is-better { border-color: rgba(122, 68, 38, .55); }
-.prompt.is-better h3 { color: var(--copper); }
-.prompt p { margin: 0; font-family: var(--font-mono); font-size: clamp(13px, min(1.05vw, 2.1vh), 19px); line-height: 1.5; }
+/* A prompt is set like a quotation: no box, a rule down its side */
+.prompt { margin: 1.4em 0 0; padding: .1em 0 .1em 1.3em; border-left: 2px solid var(--rule); font-family: var(--font-mono); font-size: clamp(13px, min(1.08vw, 2.15vh), 20px); line-height: 1.55; color: var(--ink); text-wrap: pretty; }
+.prompt.is-better { border-left-color: var(--copper); }
+.prompt + .prompt { margin-top: 1em; }
+.prompt-size { display: block; margin-top: .7em; font-size: .78em; letter-spacing: .1em; text-transform: uppercase; color: var(--copper); }
+.tag { margin: 1.5em 0 0; font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--copper); }
+.tag + :is(.lead, .prompt, .points) { margin-top: .8em; }
+.facts { margin: 1.4em 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .7em 1.4em; font-size: clamp(15px, min(1.3vw, 2.5vh), 24px); line-height: 1.36; }
+.facts dt { font-family: var(--font-mono); font-size: .76em; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--copper); padding-top: .32em; }
+.facts dd { margin: 0; }
+/* Next-token example: candidates and how likely each one is */
+.odds { list-style: none; margin: 1.3em 0 0; padding: 0; display: grid; gap: .55em; font-family: var(--font-mono); font-size: clamp(13px, min(1.08vw, 2.15vh), 20px); }
+.odds li { display: grid; grid-template-columns: 6.2em minmax(0, 1fr) 3.2em; align-items: center; column-gap: .9em; }
+.odds .bar { height: .5em; border-radius: .25em; background: var(--rule); overflow: hidden; }
+.odds .bar i { display: block; height: 100%; width: var(--p); border-radius: inherit; background: var(--ink); }
+.odds li:first-child .bar i { background: var(--copper); }
+.odds .pct { text-align: right; color: var(--ink-2); }
+
+/* Panels: a slide can hold several; the deck steps through them sideways. Without scripts they simply follow each other. */
+.panel + .panel { margin-top: 2em; }
+.pager { display: none; }
+.deck.is-live .panels { display: grid; }
+.deck.is-live .panel { grid-area: 1 / 1; margin: 0; }
+.deck.is-live .panel > :first-child { margin-top: 1.4em; }
+.deck.is-live .pager { margin-top: clamp(18px, 3.4vh, 36px); display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: clamp(10px, .7vw, 13px); letter-spacing: .12em; color: var(--ink-2); }
+.pager i { width: 6px; height: 6px; border-radius: 3px; background: var(--rule); transition: width .5s cubic-bezier(.2, .7, .2, 1), background-color .5s ease; }
+.pager i.is-on { width: 22px; background: var(--copper); }
+.pager span { margin-left: 8px; }
 
 .deck.is-live {
   height: 100vh; height: 100lvh; overflow: hidden;
-  background: radial-gradient(70% 60% at 72% 46%, #dfe2e3 0%, var(--studio-low) 62%);
+  background: radial-gradient(70% 60% at var(--fx, 72%) 46%, #dfe2e3 0%, var(--studio-low) 62%);   /* a soft light behind the figure */
 }
 .deck.is-live[data-layout="narrow"] { background: radial-gradient(90% 34% at 50% 24%, #dfe2e3 0%, var(--studio-low) 62%); }
 .deck.is-live canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
@@ -265,14 +287,18 @@ body.is-locked { overflow: hidden; }
   padding: calc(var(--st) + clamp(20px, 5vh, 64px)) var(--gr) calc(var(--sb) + clamp(48px, 9vh, 92px)) var(--gl);
 }
 .deck.is-live .slide-body { width: min(47%, 760px); max-width: none; }
+.deck.is-live[data-layout="wide"] .slide.is-flipped .slide-body { margin-left: auto; }   /* figure on the left, text on the right */
 .deck.is-live[data-layout="narrow"] .slide { align-items: flex-end; }
 .deck.is-live[data-layout="narrow"] .slide-body { width: 100%; }
 .deck[data-layout="narrow"] .slide h2 { font-size: clamp(25px, 6.6vw, 46px); }
 .deck[data-layout="narrow"] .lead { font-size: clamp(15px, 3.4vw, 22px); }
 .deck[data-layout="narrow"] :is(.points, .timeline) { font-size: clamp(14px, 3.1vw, 20px); gap: .5em; }
-.deck[data-layout="narrow"] :is(.lead, .points, .timeline, .cols, .prompts, .note) { margin-top: 1em; }
+.deck[data-layout="narrow"] :is(.lead, .points, .timeline, .cols, .prompt, .note, .tag, .facts, .odds) { margin-top: 1em; }
+.deck[data-layout="narrow"] .panel > :first-child { margin-top: 1em; }
+.deck[data-layout="narrow"] :is(.facts, .odds) { font-size: clamp(13px, 3vw, 19px); }
+.deck[data-layout="narrow"] .facts { gap: .5em 1em; }
 .deck[data-layout="narrow"] .note { padding-top: .8em; font-size: clamp(13px, 2.8vw, 18px); }
-.deck[data-layout="narrow"] .prompt p { font-size: clamp(12px, 2.9vw, 17px); }
+.deck[data-layout="narrow"] .prompt { font-size: clamp(12px, 2.9vw, 17px); padding-left: 1em; }
 @media (max-height: 540px) and (min-aspect-ratio: 6/5) {      /* a phone on its side */
   .deck.is-live .slide { padding-top: calc(var(--st) + 12px); padding-bottom: calc(var(--sb) + 34px); }
   .deck.is-live .slide-body { width: 52%; }
@@ -280,12 +306,12 @@ body.is-locked { overflow: hidden; }
   .deck .slide h2 { font-size: clamp(19px, 6.6vh, 34px); }
   .deck .lead { font-size: clamp(12px, 3.5vh, 16px); line-height: 1.32; }
   .deck :is(.points, .timeline) { font-size: clamp(11.5px, 3.3vh, 15px); gap: .34em; line-height: 1.3; }
-  .deck :is(.lead, .points, .timeline, .cols, .prompts, .note) { margin-top: .7em; }
+  .deck :is(.lead, .points, .timeline, .cols, .prompt, .note, .tag, .facts, .odds) { margin-top: .6em; }
+  .deck.is-live .panel > :first-child { margin-top: .6em; }
   .deck .note { padding-top: .6em; font-size: 11px; }
-  .deck .prompt { padding: 7px 10px; }
-  .deck .prompt h3 { margin-bottom: .3em; }
-  .deck .prompt p { font-size: 11px; line-height: 1.4; }
-  .deck .prompts { gap: 6px; }
+  .deck .prompt { font-size: 11px; line-height: 1.4; }
+  .deck :is(.facts, .odds) { font-size: 11.5px; gap: .3em 1em; }
+  .deck.is-live .pager { margin-top: 8px; }
   .deck.is-live .deck-hud { bottom: calc(var(--sb) + 10px); }
 }
 .deck.is-live .deck-hud {
@@ -480,14 +506,36 @@ body.is-locked { overflow: hidden; }
             <div class="slide-body">
               <p class="chapter"><span class="num">03</span>AI in Daily Life</p>
               <h2>Everyday examples</h2>
-              <p class="lead">Most of the AI we use never calls itself AI.</p>
-              <ul class="points">
-                <li><b>Recommendations:</b> what to watch, listen to or buy next.</li>
-                <li><b>Navigation:</b> live traffic and arrival times.</li>
-                <li><b>Communication:</b> spam filters, autocorrect, translation.</li>
-                <li><b>Phones:</b> face unlock, voice assistants, sharper photos.</li>
-                <li><b>Banking:</b> fraud checks on every card payment.</li>
-              </ul>
+              <div class="panels">
+                <div class="panel">
+                  <p class="lead">Most of the AI we use never calls itself AI.</p>
+                  <ul class="points">
+                    <li><b>Recommendations:</b> what to watch, listen to or buy next.</li>
+                    <li><b>Navigation:</b> live traffic and arrival times.</li>
+                    <li><b>Communication:</b> spam filters, autocorrect, translation.</li>
+                    <li><b>Phones:</b> face unlock, voice assistants, sharper photos.</li>
+                    <li><b>Banking:</b> fraud checks on every card payment.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <p class="tag">Example · Navigation</p>
+                  <p class="lead">A maps app does not just know the roads. It knows how fast they are moving right now.</p>
+                  <dl class="facts">
+                    <dt>Data</dt><dd>Anonymous speed and location from phones on the road.</dd>
+                    <dt>Model</dt><dd>Predicts how the traffic will change in the next minutes.</dd>
+                    <dt>Result</dt><dd>An arrival time, and a new route when things change.</dd>
+                  </dl>
+                </div>
+                <div class="panel">
+                  <p class="tag">Example · Recommendations</p>
+                  <p class="lead">The next video is not a coincidence. It is a prediction about you.</p>
+                  <dl class="facts">
+                    <dt>Data</dt><dd>What you watched, skipped and searched for.</dd>
+                    <dt>Model</dt><dd>Finds people with similar taste, and what they enjoyed.</dd>
+                    <dt>Result</dt><dd>A ranked list that is different for every user.</dd>
+                  </dl>
+                </div>
+              </div>
             </div>
           </article>
 
@@ -534,13 +582,28 @@ body.is-locked { overflow: hidden; }
             <div class="slide-body">
               <p class="chapter"><span class="num">04</span>AI in Our Field</p>
               <h2>How LLMs work</h2>
-              <p class="lead">A large language model does one thing: it predicts the next token, again and again.</p>
-              <ol class="points steps">
-                <li><b>Tokenise:</b> the text is split into tokens, small pieces of words.</li>
-                <li><b>Embed:</b> each token becomes a list of numbers.</li>
-                <li><b>Attend:</b> transformer layers weigh how the tokens relate to each other.</li>
-                <li><b>Predict:</b> the model scores every possible next token and picks one.</li>
-              </ol>
+              <div class="panels">
+                <div class="panel">
+                  <p class="lead">A large language model does one thing: it predicts the next token, again and again.</p>
+                  <ol class="points steps">
+                    <li><b>Tokenise:</b> the text is split into tokens, small pieces of words.</li>
+                    <li><b>Embed:</b> each token becomes a list of numbers.</li>
+                    <li><b>Attend:</b> transformer layers weigh how the tokens relate to each other.</li>
+                    <li><b>Predict:</b> the model scores every possible next token and picks one.</li>
+                  </ol>
+                </div>
+                <div class="panel">
+                  <p class="tag">Example · One prediction</p>
+                  <p class="prompt is-better">The capital of Türkiye is ▍</p>
+                  <ol class="odds" aria-label="Most likely next tokens (illustrative values)">
+                    <li><span>Ankara</span><span class="bar"><i style="--p: 93%"></i></span><span class="pct">93%</span></li>
+                    <li><span>Istanbul</span><span class="bar"><i style="--p: 4%"></i></span><span class="pct">4%</span></li>
+                    <li><span>located</span><span class="bar"><i style="--p: 1.5%"></i></span><span class="pct">1%</span></li>
+                    <li><span>a</span><span class="bar"><i style="--p: 1%"></i></span><span class="pct">&lt;1%</span></li>
+                  </ol>
+                  <p class="note">The chosen token joins the text, and the model predicts again. Values are illustrative.</p>
+                </div>
+              </div>
             </div>
           </article>
 
@@ -548,17 +611,31 @@ body.is-locked { overflow: hidden; }
             <div class="slide-body">
               <p class="chapter"><span class="num">04</span>AI in Our Field</p>
               <h2>Basic vs. technical prompts</h2>
-              <div class="prompts">
-                <div class="prompt">
-                  <h3>Basic</h3>
-                  <p>Write a sort function.</p>
+              <div class="panels">
+                <div class="panel">
+                  <p class="tag">Basic</p>
+                  <p class="prompt">Write a method that reads a file.</p>
+                  <ul class="points">
+                    <li>Which language and version? Which file format?</li>
+                    <li>Sync or async? What if the file is huge, or broken?</li>
+                    <li>The model has to guess, so the answer is generic.</li>
+                  </ul>
                 </div>
-                <div class="prompt is-better">
-                  <h3>Technical</h3>
-                  <p>You are reviewing Python 3.12 code. Write a stable merge sort for a list of dicts, sorted by "date". Add type hints and two unit tests. Return only the code.</p>
+                <div class="panel">
+                  <p class="tag">Technical</p>
+                  <p class="prompt is-better">You are a senior C# developer working with .NET 8. Write an async method ReadOrdersAsync(string path, CancellationToken ct) that streams a UTF-8 CSV file line by line and returns IAsyncEnumerable&lt;Order&gt;. Skip malformed rows and log them with ILogger. Never load the whole file into memory. Return only the code, with XML doc comments.</p>
+                </div>
+                <div class="panel">
+                  <p class="tag">What changed</p>
+                  <dl class="facts">
+                    <dt>Role</dt><dd>A senior C# developer, on .NET 8.</dd>
+                    <dt>Task</dt><dd>One method, with its exact signature.</dd>
+                    <dt>Constraints</dt><dd>Streaming, error handling, memory.</dd>
+                    <dt>Output</dt><dd>Code only, documented.</dd>
+                  </dl>
+                  <p class="note">Same model, far better answer.</p>
                 </div>
               </div>
-              <p class="note">Role · Context · Task · Constraints · Output format</p>
             </div>
           </article>
 
@@ -566,13 +643,22 @@ body.is-locked { overflow: hidden; }
             <div class="slide-body">
               <p class="chapter"><span class="num">04</span>AI in Our Field</p>
               <h2>Token efficiency and accuracy</h2>
-              <p class="lead">Tokens are the unit of cost, speed and memory. One token is roughly four characters of English.</p>
-              <ul class="points">
-                <li>Give the model what is relevant, not everything you have.</li>
-                <li>Structure beats length: clear sections, examples, the format you expect.</li>
-                <li>Break large tasks into smaller steps.</li>
-                <li>Check the result: run the tests, read the sources.</li>
-              </ul>
+              <div class="panels">
+                <div class="panel">
+                  <p class="lead">Tokens are the unit of cost, speed and memory. One token is roughly four characters of English.</p>
+                  <ul class="points">
+                    <li>Give the model what is relevant, not everything you have.</li>
+                    <li>Structure beats length: clear sections, examples, the format you expect.</li>
+                    <li>Break large tasks into smaller steps.</li>
+                    <li>Check the result: run the tests, read the sources.</li>
+                  </ul>
+                </div>
+                <div class="panel">
+                  <p class="tag">Example · The same request</p>
+                  <p class="prompt">Hello! I hope you are doing well. I was wondering if you could possibly help me out by writing, if it is not too much trouble, a C# method that would be able to check whether a given number is a prime number or not. Thank you so much in advance!<span class="prompt-size">About 60 tokens</span></p>
+                  <p class="prompt is-better">Write a C# method IsPrime(int n). Return only the code.<span class="prompt-size">About 14 tokens</span></p>
+                </div>
+              </div>
             </div>
           </article>
 
@@ -1324,7 +1410,7 @@ body.is-locked { overflow: hidden; }
     const out = [0];
     if (!stage.classList.contains("no-head")) out.push(labelY(mainTl, "contents-shown"));
     parts.forEach((p, i) => out.push(labelY(mainTl, "part-" + i)));
-    if (deckTl && deckTl.scrollTrigger) slides.forEach((s, i) => out.push(labelY(deckTl, "slide-" + i)));
+    if (deckTl && deckTl.scrollTrigger) stops.forEach((s, k) => out.push(labelY(deckTl, "stop-" + k)));
     out.push(Math.round(ScrollTrigger.maxScroll(window)));
     return out;
   }
@@ -1342,7 +1428,7 @@ body.is-locked { overflow: hidden; }
     // Forward plays the scene at a watchable pace; going back is quicker.
     let duration = y > from ? clamp(screens * 1.75, 0.6, 6.5) : clamp(screens * 0.7, 0.5, 2.5);
     const ds = deckTl && deckTl.scrollTrigger;
-    if (ds && Math.min(from, y) >= ds.start - 2 && Math.max(from, y) <= ds.end + 2 && screens < 1.5) duration = 1.1;   // slide to slide
+    if (ds && Math.min(from, y) >= ds.start - 2 && Math.max(from, y) <= ds.end + 2 && screens < 1.6) duration = 2.3;   // one step inside the slides: unhurried
     target = y;
     if (smoother) goTween = gsap.to(smoother, { scrollTop: y, duration: duration, ease: "power2.inOut", onComplete: stopGo });
     else if (hasScrollTo) goTween = gsap.to(window, { scrollTo: { y: y, autoKill: false }, duration: duration, ease: "power2.inOut", onComplete: stopGo });
@@ -1537,17 +1623,45 @@ body.is-locked { overflow: hidden; }
   }
 
   /* ---------------- Slides ---------------- */
-  // One pinned section. A scrubbed timeline swaps the slides; its position also tells the figure which shape to form.
+  // One pinned section and one scrubbed timeline. The talk stops once on every slide, and once more on every further
+  // panel inside a slide (those arrive sideways). The same position tells the figure which shape to form and where.
+  const stops = [];                              // { slide, panel } in the order of the talk
   const deckState = { pos: 0, gather: 0 };
   const pointer = { x: 0, y: 0 };
+  const figureBox = { wide: true, y: 0.5, w: 0.4, h: 0.74 };
+  const sideOf = (slide) => (slide % 2 ? 0.265 : 0.735);       // the figure alternates: right, left, right…
+  const ease = (t) => t * t * (3 - 2 * t);
   let figure = null;
+  let turnsBefore = [];                          // sideways steps taken before each stop: one turn of the figure each
+  let shownStop = -1;
   const pad2 = (n) => String(n).padStart(2, "0");
 
   function deckChanged() {
-    const last = Math.max(1, slides.length - 1);
-    if (figure) { figure.progress(deckState.pos); figure.gather(deckState.gather); }
-    deckCount.textContent = pad2(Math.round(deckState.pos) + 1) + " / " + pad2(slides.length);
-    deckFill.style.transform = "scaleX(" + (deckState.pos / last).toFixed(4) + ")";
+    if (!stops.length) return;
+    const lastStop = stops.length - 1;
+    const k = clamp(Math.floor(deckState.pos), 0, lastStop);
+    const a = stops[k];
+    const b = stops[Math.min(lastStop, k + 1)];
+    const f = clamp(deckState.pos - k, 0, 1);
+    const m = ease(clamp((f - 0.18) / 0.72, 0, 1));            // changes happen between the stops, not on them
+    if (figure) {
+      const sameSlide = a.slide === b.slide;
+      figure.progress(sameSlide ? a.slide : a.slide + f);
+      figure.twist(turnsBefore[k] + (sameSlide && b !== a ? m : 0));
+      figure.gather(deckState.gather);
+      if (figureBox.wide) {
+        const x = lerp(sideOf(a.slide), sideOf(b.slide), m);
+        figure.place({ x: x, y: figureBox.y, w: figureBox.w, h: figureBox.h });
+        deck.style.setProperty("--fx", (x * 100).toFixed(1) + "%");
+      }
+    }
+    const near = stops[clamp(Math.round(deckState.pos), 0, lastStop)];
+    if (near !== stops[shownStop]) {
+      shownStop = stops.indexOf(near);
+      deckCount.textContent = pad2(near.slide + 1) + " / " + pad2(slides.length);
+      $$(".pager i", slides[near.slide]).forEach((dot, j) => dot.classList.toggle("is-on", j === near.panel));
+    }
+    deckFill.style.transform = "scaleX(" + (deckState.pos / Math.max(1, lastStop)).toFixed(4) + ")";
   }
 
   function measureDeck() {
@@ -1561,8 +1675,10 @@ body.is-locked { overflow: hidden; }
     if (!figure) return;
     figure.resize(w, h, Math.min(window.devicePixelRatio || 1, 2));
     const k = uh / h;                            // the text lives in the always-visible part of the section
+    figureBox.wide = wide;
     if (wide) {
-      figure.place({ x: 0.735, y: 0.5 * k, w: 0.4, h: 0.74 * k });
+      figureBox.y = 0.5 * k; figureBox.w = 0.4; figureBox.h = 0.74 * k;
+      $("#figure").style.opacity = "";
     } else {
       // The figure takes the room above the longest slide.
       const tallest = Math.max.apply(null, slides.map((s) => s.firstElementChild.offsetHeight));
@@ -1570,10 +1686,11 @@ body.is-locked { overflow: hidden; }
       const room = Math.max(0, uh - bottom - tallest - 12);
       const top = insets().top + 10;
       const fits = room - top > uh * 0.16;
-      deck.querySelector("canvas").style.opacity = fits ? "" : "0.3";      // no room: it stays in the background
+      $("#figure").style.opacity = fits ? "" : "0.3";          // no room: it stays in the background
       const zone = fits ? room - top : uh * 0.5;
       figure.place({ x: 0.5, y: (top + zone / 2) / h, w: 0.86, h: (zone * 0.96) / h });
     }
+    deckChanged();
   }
 
   function buildDeck() {
@@ -1587,47 +1704,84 @@ body.is-locked { overflow: hidden; }
     } catch (e) { figure = null; }
     if (!figure) $("#figure").style.display = "none";
 
-    // What moves when a slide arrives: its blocks, and the entries of its lists one by one
-    const units = slides.map((s) => {
+    // The stops of the talk, and a row of dots under every slide that has more than one panel
+    const panelsOf = slides.map((s) => $$(".panel", s));
+    slides.forEach((s, i) => {
+      s.classList.toggle("is-flipped", i % 2 === 1);
+      const count = Math.max(1, panelsOf[i].length);
+      for (let j = 0; j < count; j++) stops.push({ slide: i, panel: j });
+      if (count > 1) {
+        const pager = document.createElement("p");
+        pager.className = "pager";
+        pager.setAttribute("aria-hidden", "true");
+        for (let j = 0; j < count; j++) pager.appendChild(document.createElement("i"));
+        pager.appendChild(document.createElement("span")).textContent = "→";
+        s.firstElementChild.appendChild(pager);
+      }
+    });
+    turnsBefore = stops.map((s, k) => stops.slice(1, k + 1).filter((t, n) => t.slide === stops[n].slide).length);
+
+    // What moves when something arrives: blocks, and the entries of lists one by one
+    const pieces = (els) => {
       const out = [];
-      $$(".slide-body > *", s).forEach((el) => {
-        const items = el.matches(".points, .timeline") ? $$("li", el) : el.matches(".cols, .prompts") ? Array.from(el.children) : [el];
+      els.forEach((el) => {
+        const items = el.matches(".points, .timeline, .odds") ? $$("li", el)
+          : el.matches(".cols") ? Array.from(el.children)
+          : el.matches(".facts") ? $$("dd", el).map((dd) => [dd.previousElementSibling, dd])
+          : [el];
         items.forEach((item) => out.push(item));
       });
       return out;
-    });
-    const n = slides.length;
+    };
+    const unitsOf = (i) => {
+      const out = [];
+      Array.from(slides[i].firstElementChild.children).forEach((el) => {
+        if (el.matches(".panels")) pieces(Array.from(panelsOf[i][0].children)).forEach((u) => out.push(u));
+        else pieces([el]).forEach((u) => out.push(u));
+      });
+      return out;
+    };
+    const S = stops.length;
 
     // Arriving: the figure gathers and the first slide fades up while the section scrolls into place.
-    gsap.timeline({ defaults: { ease: "none" }, scrollTrigger: { trigger: deck, start: "top 85%", end: "top top", scrub: 0.6 } })
+    gsap.timeline({ defaults: { ease: "none" }, scrollTrigger: { trigger: deck, start: "top 85%", end: "top top", scrub: 0.8 } })
       .fromTo(deckState, { gather: 0 }, { gather: 1, duration: 1, onUpdate: deckChanged }, 0)
-      .fromTo(units[0], { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.45, stagger: { amount: 0.3 }, ease: "power2.out" }, 0.3);
+      .fromTo(unitsOf(0), { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.45, stagger: { amount: 0.3 }, ease: "power2.out" }, 0.3);
 
-    // One unit of time per slide: it leaves at +0.18, the next one is complete before the following stop.
+    // One unit of time per stop. Whatever leaves starts at +0.18; whatever arrives is complete before the next stop.
     const dtl = gsap.timeline({
       defaults: { ease: "none" },
       scrollTrigger: {
         trigger: deck,
         start: "top top",
-        end: () => "+=" + Math.round((deck.offsetHeight || window.innerHeight) * 0.85 * (n - 1 + 0.4)),
+        end: () => "+=" + Math.round((deck.offsetHeight || window.innerHeight) * (S - 1 + 0.4)),
         pin: true,
-        scrub: 0.6,
+        scrub: 0.8,
         anticipatePin: 1,
         invalidateOnRefresh: true,
       },
     });
     deckTl = dtl;
-    dtl.to(deckState, { pos: n - 1, duration: n - 1, onUpdate: deckChanged }, 0);
-    slides.forEach((s, i) => {
-      dtl.addLabel("slide-" + i, i);
-      if (i > 0) {
-        gsap.set(s, { autoAlpha: 0 });
-        dtl.set(s, { autoAlpha: 1, y: 0 }, i - 0.52)
-           .fromTo(units[i], { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, stagger: { amount: 0.16 }, ease: "power2.out" }, i - 0.5);
+    dtl.to(deckState, { pos: S - 1, duration: S - 1, onUpdate: deckChanged }, 0);
+    slides.forEach((s, i) => { if (i > 0) gsap.set(s, { autoAlpha: 0 }); });
+    stops.forEach((stop, k) => {
+      dtl.addLabel("stop-" + k, k);
+      if (k === S - 1) return;
+      const next = stops[k + 1];
+      if (next.slide !== stop.slide) {
+        // next slide: this one lifts away, the next one rises in piece by piece
+        dtl.fromTo(slides[stop.slide], { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -22, duration: 0.26, ease: "power1.in", immediateRender: false }, k + 0.18)
+           .set(slides[next.slide], { autoAlpha: 1, y: 0 }, k + 0.48)
+           .fromTo(unitsOf(next.slide), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, stagger: { amount: 0.16 }, ease: "power2.out" }, k + 0.5);
+      } else {
+        // next panel of the same slide: a step sideways
+        const from = panelsOf[stop.slide][stop.panel];
+        const to = panelsOf[stop.slide][next.panel];
+        dtl.fromTo(from, { autoAlpha: 1, xPercent: 0 }, { autoAlpha: 0, xPercent: -16, duration: 0.3, ease: "power2.in", immediateRender: false }, k + 0.18)
+           .fromTo(to, { autoAlpha: 0, xPercent: 16 }, { autoAlpha: 1, xPercent: 0, duration: 0.4, ease: "power2.out" }, k + 0.48);
       }
-      if (i < n - 1) dtl.fromTo(s, { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -22, duration: 0.26, ease: "power1.in", immediateRender: false }, i + 0.18);
     });
-    dtl.to({}, { duration: 0.4 }, n - 1);        // a beat on the last slide before the page moves on
+    dtl.to({}, { duration: 0.4 }, S - 1);        // a beat on the last slide before the page moves on
 
     // The figure is only drawn while the section is on screen.
     if (figure) {
