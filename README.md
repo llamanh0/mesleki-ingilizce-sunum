@@ -6,5 +6,5 @@ A website created for our Professional English (Mesleki İngilizce) course.
 
 **Presented by** Hasan Batuhan Kılıçkan and Samet Burak Gülten
 
-Scroll to play the presentation, or step through it with the arrow keys or a clicker. Press `F` for full screen.
+Scroll to play the presentation, or step through it slide by slide with the arrow keys or a clicker. Press `F` (or the button in the top-right corner) for full screen.
 The site has no external dependencies, so it also runs offline: download the repository and open `index.html`.
