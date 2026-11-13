@@ -245,6 +245,9 @@ body.is-locked { overflow: hidden; }
 .cols { margin: 1.5em 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(18px, 2.6vw, 48px); }
 .cols h3 { margin: 0 0 .9em; font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--copper); }
 .cols .points { margin: 0; }
+/* Where a slide's facts come from, in the order they appear on it */
+.cite { margin: 1.8em 0 0; max-width: 46em; font-size: var(--fs-label); line-height: 1.55; color: var(--ink-2); text-wrap: pretty; }
+.cite b { margin-right: 1em; font-family: var(--font-mono); font-size: .92em; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
 /* A prompt is set like a quotation: no box, a rule down its side */
 .prompt { margin: 1.4em 0 0; padding: .1em 0 .1em 1.3em; border-left: 2px solid var(--rule); font-family: var(--font-mono); font-size: clamp(13px, min(1.08vw, 2.15vh), 20px); line-height: 1.55; color: var(--ink); text-wrap: pretty; }
 .prompt.is-better { border-left-color: var(--copper); }
@@ -280,6 +283,7 @@ body.is-locked { overflow: hidden; }
 .deck[data-layout="narrow"] .lead { font-size: clamp(15px, 3.4vw, 22px); }
 .deck[data-layout="narrow"] :is(.points, .timeline) { font-size: clamp(14px, 3.1vw, 20px); gap: .5em; }
 .deck[data-layout="narrow"] :is(.lead, .points, .timeline, .cols, .prompt, .note, .tag) { margin-top: 1em; }
+.deck[data-layout="narrow"] .cite { margin-top: 1.2em; font-size: clamp(10.5px, 2.5vw, 14px); }
 .deck[data-layout="narrow"] .tag + .prompt { margin-top: .6em; }
 .deck[data-layout="narrow"] .note { padding-top: .8em; font-size: clamp(13px, 2.8vw, 18px); }
 .deck[data-layout="narrow"] .prompt { font-size: clamp(12px, 2.9vw, 17px); padding-left: 1em; }
@@ -292,6 +296,7 @@ body.is-locked { overflow: hidden; }
   .deck :is(.points, .timeline) { font-size: clamp(11.5px, 3.3vh, 15px); gap: .34em; line-height: 1.3; }
   .deck :is(.lead, .points, .timeline, .cols, .prompt, .note, .tag) { margin-top: .6em; }
   .deck .tag + .prompt { margin-top: .3em; }
+  .deck .cite { margin-top: .8em; font-size: 9.5px; line-height: 1.4; }
   .deck .note { padding-top: .6em; font-size: 11px; }
   .deck .prompt { font-size: 10.5px; line-height: 1.38; }
   .deck.is-live .deck-hud { bottom: calc(var(--sb) + 10px); }
@@ -508,6 +513,7 @@ body.is-locked { overflow: hidden; }
                 <li><b>Generative AI</b> produces new text, images and code.</li>
               </ul>
               <p class="note">Today’s AI is narrow: excellent at specific tasks, not a general mind.</p>
+              <p class="cite"><b>Sources</b>Russell &amp; Norvig, 2021 · LeCun et al., 2015 · NIST, 2024</p>
             </div>
           </article>
 
@@ -523,6 +529,7 @@ body.is-locked { overflow: hidden; }
                 <li><span class="year">2017</span><span>“Attention Is All You Need” introduces the Transformer.</span></li>
                 <li><span class="year">2022</span><span>ChatGPT puts large language models in everyone’s hands.</span></li>
               </ol>
+              <p class="cite"><b>Sources</b>Turing, 1950 · McCarthy et al., 1955/2006 · Campbell et al., 2002 · Krizhevsky et al., 2012 · Vaswani et al., 2017 · OpenAI, 2022</p>
             </div>
           </article>
 
@@ -532,12 +539,13 @@ body.is-locked { overflow: hidden; }
               <h2>Everyday examples</h2>
               <p class="lead">Most of the AI we use never calls itself AI.</p>
               <ul class="points">
-                <li><b>Recommendations:</b> what to watch, listen to or buy next.</li>
+                <li><b>Recommendations:</b> what to watch next.</li>
                 <li><b>Navigation:</b> live traffic and arrival times.</li>
-                <li><b>Communication:</b> spam filters, autocorrect, translation.</li>
-                <li><b>Phones:</b> face unlock, voice assistants, sharper photos.</li>
-                <li><b>Banking:</b> fraud checks on every card payment.</li>
+                <li><b>Communication:</b> spam filters and translation.</li>
+                <li><b>Phones:</b> face unlock and voice search.</li>
+                <li><b>Banking:</b> fraud detection on card payments.</li>
               </ul>
+              <p class="cite"><b>Sources</b>Gomez-Uribe &amp; Hunt, 2015 · Derrow-Pinion et al., 2021 · Stone et al., 2016 · Apple, 2026</p>
             </div>
           </article>
 
@@ -563,6 +571,7 @@ body.is-locked { overflow: hidden; }
                   </ul>
                 </div>
               </div>
+              <p class="cite"><b>Sources</b>Peng et al., 2023 · LeCun et al., 2015 · Mehrabi et al., 2021 · Ji et al., 2023 · NIST, 2024</p>
             </div>
           </article>
 
@@ -577,6 +586,7 @@ body.is-locked { overflow: hidden; }
                 <li><b>Tests and documentation:</b> the work that often gets skipped.</li>
                 <li><b>Learning:</b> unfamiliar code, libraries and concepts, explained.</li>
               </ul>
+              <p class="cite"><b>Sources</b>Stack Overflow, 2025 · Peng et al., 2023</p>
             </div>
           </article>
 
@@ -591,6 +601,7 @@ body.is-locked { overflow: hidden; }
                 <li><b>Attend:</b> transformer layers weigh how the tokens relate to each other.</li>
                 <li><b>Predict:</b> the model scores every possible next token and picks one.</li>
               </ol>
+              <p class="cite"><b>Sources</b>Vaswani et al., 2017 · OpenAI, n.d.</p>
             </div>
           </article>
 
@@ -603,6 +614,7 @@ body.is-locked { overflow: hidden; }
               <p class="tag">Technical</p>
               <p class="prompt is-better">You are a senior C# developer working with .NET 8. Write an async method ReadOrdersAsync(string path, CancellationToken ct) that streams a UTF-8 CSV file line by line and returns IAsyncEnumerable&lt;Order&gt;. Skip malformed rows and log them with ILogger. Never load the whole file into memory. Return only the code, with XML doc comments.</p>
               <p class="note">Role · Task · Constraints · Output format: the same model, a far better answer.</p>
+              <p class="cite"><b>Sources</b>Anthropic, n.d. · Microsoft, n.d.</p>
             </div>
           </article>
 
@@ -610,13 +622,14 @@ body.is-locked { overflow: hidden; }
             <div class="slide-body">
               <p class="chapter"><span class="num">04</span><span class="chapter-name">AI in Our Field</span></p>
               <h2>Token efficiency and accuracy</h2>
-              <p class="lead">Tokens are the unit of cost, speed and memory. One token is roughly four characters of English.</p>
+              <p class="lead">Tokens are how a model measures cost and context. One token is roughly four characters of English.</p>
               <ul class="points">
                 <li>Give the model what is relevant, not everything you have.</li>
                 <li>Structure beats length: clear sections, examples, the format you expect.</li>
                 <li>Break large tasks into smaller steps.</li>
                 <li>Check the result: run the tests, read the sources.</li>
               </ul>
+              <p class="cite"><b>Sources</b>OpenAI, n.d. · Liu et al., 2024 · Anthropic, n.d. · Ji et al., 2023</p>
             </div>
           </article>
 
@@ -630,6 +643,7 @@ body.is-locked { overflow: hidden; }
                 <li><b>Be transparent:</b> say when AI helped, and follow the rules of your course or company.</li>
                 <li><b>Stay the engineer:</b> you are responsible for the code you ship.</li>
               </ul>
+              <p class="cite"><b>Sources</b>NIST, 2024 · OWASP Foundation, 2025 · ACM, 2018</p>
             </div>
           </article>
 
@@ -661,21 +675,27 @@ body.is-locked { overflow: hidden; }
             <p class="sources-lead">The books, papers and documentation behind this presentation.</p>
           </header>
           <ol class="refs">
-            <li>Anthropic. (n.d.). <i>Prompt engineering overview</i>. Claude Platform Docs. Retrieved November 13, 2026, from <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview" target="_blank" rel="noopener">https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview</a></li>
+            <li>Anthropic. (n.d.). <i>Prompting best practices</i>. Claude Platform Docs. Retrieved November 13, 2026, from <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices" target="_blank" rel="noopener">https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices</a></li>
+            <li>Apple. (2026, September 18). <i>About Face ID advanced technology</i>. Apple Support. <a href="https://support.apple.com/en-us/102381" target="_blank" rel="noopener">https://support.apple.com/en-us/102381</a></li>
             <li>Association for Computing Machinery. (2018). <i>ACM code of ethics and professional conduct</i>. <a href="https://www.acm.org/code-of-ethics" target="_blank" rel="noopener">https://www.acm.org/code-of-ethics</a></li>
             <li>Campbell, M., Hoane, A. J., Jr., &amp; Hsu, F.-h. (2002). Deep Blue. <i>Artificial Intelligence, 134</i>(1–2), 57–83. <a href="https://doi.org/10.1016/S0004-3702(01)00129-1" target="_blank" rel="noopener">https://doi.org/10.1016/S0004-3702(01)00129-1</a></li>
+            <li>Derrow-Pinion, A., She, J., Wong, D., Lange, O., Hester, T., Perez, L., Nunkesser, M., Lee, S., Guo, X., Wiltshire, B., Battaglia, P. W., Gupta, V., Li, A., Xu, Z., Sanchez-Gonzalez, A., Li, Y., &amp; Veličković, P. (2021). ETA prediction with graph neural networks in Google Maps. In <i>Proceedings of the 30th ACM International Conference on Information and Knowledge Management</i> (pp. 3767–3776). ACM. <a href="https://doi.org/10.1145/3459637.3481916" target="_blank" rel="noopener">https://doi.org/10.1145/3459637.3481916</a></li>
             <li>Gomez-Uribe, C. A., &amp; Hunt, N. (2015). The Netflix recommender system: Algorithms, business value, and innovation. <i>ACM Transactions on Management Information Systems, 6</i>(4), Article 13. <a href="https://doi.org/10.1145/2843948" target="_blank" rel="noopener">https://doi.org/10.1145/2843948</a></li>
             <li>Ji, Z., Lee, N., Frieske, R., Yu, T., Su, D., Xu, Y., Ishii, E., Bang, Y. J., Madotto, A., &amp; Fung, P. (2023). Survey of hallucination in natural language generation. <i>ACM Computing Surveys, 55</i>(12), Article 248. <a href="https://doi.org/10.1145/3571730" target="_blank" rel="noopener">https://doi.org/10.1145/3571730</a></li>
             <li>Krizhevsky, A., Sutskever, I., &amp; Hinton, G. E. (2012). ImageNet classification with deep convolutional neural networks. In <i>Advances in neural information processing systems 25</i> (pp. 1097–1105). Curran Associates. <a href="https://papers.nips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html" target="_blank" rel="noopener">https://papers.nips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html</a></li>
             <li>LeCun, Y., Bengio, Y., &amp; Hinton, G. (2015). Deep learning. <i>Nature, 521</i>(7553), 436–444. <a href="https://doi.org/10.1038/nature14539" target="_blank" rel="noopener">https://doi.org/10.1038/nature14539</a></li>
-            <li>McCarthy, J., Minsky, M. L., Rochester, N., &amp; Shannon, C. E. (2006). A proposal for the Dartmouth summer research project on artificial intelligence, August 31, 1955. <i>AI Magazine, 27</i>(4), 12–14. <a href="https://doi.org/10.1609/aimag.v27i4.1904" target="_blank" rel="noopener">https://doi.org/10.1609/aimag.v27i4.1904</a></li>
+            <li>Liu, N. F., Lin, K., Hewitt, J., Paranjape, A., Bevilacqua, M., Petroni, F., &amp; Liang, P. (2024). Lost in the middle: How language models use long contexts. <i>Transactions of the Association for Computational Linguistics, 12</i>, 157–173. <a href="https://doi.org/10.1162/tacl_a_00638" target="_blank" rel="noopener">https://doi.org/10.1162/tacl_a_00638</a></li>
+            <li>McCarthy, J., Minsky, M. L., Rochester, N., &amp; Shannon, C. E. (2006). A proposal for the Dartmouth summer research project on artificial intelligence, August 31, 1955. <i>AI Magazine, 27</i>(4), 12–14. <a href="https://doi.org/10.1609/aimag.v27i4.1904" target="_blank" rel="noopener">https://doi.org/10.1609/aimag.v27i4.1904</a> (Original work published 1955)</li>
             <li>Mehrabi, N., Morstatter, F., Saxena, N., Lerman, K., &amp; Galstyan, A. (2021). A survey on bias and fairness in machine learning. <i>ACM Computing Surveys, 54</i>(6), Article 115. <a href="https://doi.org/10.1145/3457607" target="_blank" rel="noopener">https://doi.org/10.1145/3457607</a></li>
             <li>Microsoft. (n.d.). <i>Tutorial: Generate and consume async streams using C# and .NET</i>. Microsoft Learn. Retrieved November 13, 2026, from <a href="https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/generate-consume-asynchronous-stream" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/generate-consume-asynchronous-stream</a></li>
-            <li>National Institute of Standards and Technology. (2023). <i>Artificial intelligence risk management framework (AI RMF 1.0)</i> (NIST AI 100-1). U.S. Department of Commerce. <a href="https://doi.org/10.6028/NIST.AI.100-1" target="_blank" rel="noopener">https://doi.org/10.6028/NIST.AI.100-1</a></li>
+            <li>National Institute of Standards and Technology. (2024). <i>Artificial intelligence risk management framework: Generative artificial intelligence profile</i> (NIST AI 600-1). U.S. Department of Commerce. <a href="https://doi.org/10.6028/NIST.AI.600-1" target="_blank" rel="noopener">https://doi.org/10.6028/NIST.AI.600-1</a></li>
             <li>OpenAI. (n.d.). <i>What are tokens and how to count them?</i> OpenAI Help Center. Retrieved November 13, 2026, from <a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them" target="_blank" rel="noopener">https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them</a></li>
             <li>OpenAI. (2022, November 30). <i>Introducing ChatGPT</i>. <a href="https://openai.com/index/chatgpt/" target="_blank" rel="noopener">https://openai.com/index/chatgpt/</a></li>
+            <li>OWASP Foundation. (2025). <i>LLM02:2025 Sensitive information disclosure</i>. OWASP Top 10 for LLM Applications. <a href="https://genai.owasp.org/llmrisk/llm02/" target="_blank" rel="noopener">https://genai.owasp.org/llmrisk/llm02/</a></li>
             <li>Peng, S., Kalliamvakou, E., Cihon, P., &amp; Demirer, M. (2023). <i>The impact of AI on developer productivity: Evidence from GitHub Copilot</i>. arXiv. <a href="https://arxiv.org/abs/2302.06590" target="_blank" rel="noopener">https://arxiv.org/abs/2302.06590</a></li>
             <li>Russell, S., &amp; Norvig, P. (2021). <i>Artificial intelligence: A modern approach</i> (4th ed.). Pearson.</li>
+            <li>Stack Overflow. (2025). <i>2025 developer survey</i>. <a href="https://survey.stackoverflow.co/2025/" target="_blank" rel="noopener">https://survey.stackoverflow.co/2025/</a></li>
+            <li>Stone, P., Brooks, R., Brynjolfsson, E., Calo, R., Etzioni, O., Hager, G., Hirschberg, J., Kalyanakrishnan, S., Kamar, E., Kraus, S., Leyton-Brown, K., Parkes, D., Press, W., Saxenian, A., Shah, J., Tambe, M., &amp; Teller, A. (2016). <i>Artificial intelligence and life in 2030: Report of the 2015–2016 study panel</i>. One Hundred Year Study on Artificial Intelligence, Stanford University. <a href="https://ai100.stanford.edu/2016-report" target="_blank" rel="noopener">https://ai100.stanford.edu/2016-report</a></li>
             <li>Turing, A. M. (1950). Computing machinery and intelligence. <i>Mind, 59</i>(236), 433–460. <a href="https://doi.org/10.1093/mind/LIX.236.433" target="_blank" rel="noopener">https://doi.org/10.1093/mind/LIX.236.433</a></li>
             <li>Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., &amp; Polosukhin, I. (2017). Attention is all you need. In <i>Advances in neural information processing systems 30</i> (pp. 5998–6008). Curran Associates. <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">https://arxiv.org/abs/1706.03762</a></li>
           </ol>
@@ -1726,7 +1746,7 @@ body.is-locked { overflow: hidden; }
         chapter: $(".chapter", s),
         words: split ? split.words : [head],
         coded: $$(".chapter-name, .tag, .year, .cols h3", s),                                   // mono labels: decoded
-        rows: $$(".lead, .points li, .timeline li > span:last-child, .prompt, .note", s),      // running text: wiped in
+        rows: $$(".lead, .points li, .timeline li > span:last-child, .prompt, .note, .cite", s),      // running text: wiped in
       };
     });
 
