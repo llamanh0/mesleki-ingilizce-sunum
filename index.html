@@ -1767,9 +1767,21 @@ body.is-locked { overflow: hidden; }
     const dotY = gsap.quickSetter(dot, "y", "px");
     const ringX = gsap.quickTo(ring, "x", { duration: 0.45, ease: "power3" });
     const ringY = gsap.quickTo(ring, "y", { duration: 0.45, ease: "power3" });
+    // The full-screen button leans towards the pointer when it comes close.
+    const lean = fsBtn && fsBtn.classList.contains("is-ready")
+      ? { x: gsap.quickTo(fsBtn, "x", { duration: 0.5, ease: "power3" }), y: gsap.quickTo(fsBtn, "y", { duration: 0.5, ease: "power3" }) }
+      : null;
     let placed = false;
     window.addEventListener("pointermove", (e) => {
       if (e.pointerType && e.pointerType !== "mouse") return;
+      if (lean) {
+        const r = fsBtn.getBoundingClientRect();
+        const dx = e.clientX - (r.left + r.width / 2 - gsap.getProperty(fsBtn, "x"));
+        const dy = e.clientY - (r.top + r.height / 2 - gsap.getProperty(fsBtn, "y"));
+        const close = Math.hypot(dx, dy) < 84;
+        lean.x(close ? dx * 0.35 : 0);
+        lean.y(close ? dy * 0.35 : 0);
+      }
       if (!placed) {                               // first sign of a mouse: take over from the system pointer
         placed = true;
         root.classList.add("has-cursor");
