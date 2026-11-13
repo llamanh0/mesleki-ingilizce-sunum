@@ -342,6 +342,27 @@ body.is-locked { overflow: hidden; }
 .has-cursor, .has-cursor * { cursor: none !important; }
 :root:fullscreen.is-resting .cursor { opacity: 0; }
 
+/* ---------- Sources ---------- */
+.sources {
+  position: relative;
+  min-height: 100vh; min-height: 100svh;
+  padding: clamp(56px, 9vh, 112px) var(--gr) clamp(48px, 8vh, 96px) var(--gl);
+  background: var(--studio-low);
+}
+.sources-inner { max-width: 1500px; margin: 0 auto; display: grid; gap: clamp(28px, 5vh, 56px); }
+.sources h2 { margin: .5em 0 0; font-size: clamp(30px, min(4vw, 7.4vh), 76px); font-weight: 600; letter-spacing: -.035em; line-height: 1.05; }
+.sources-lead { margin: 1.1em 0 0; max-width: 22em; font-size: clamp(15px, 1.15vw, 21px); line-height: 1.45; color: var(--ink-2); text-wrap: pretty; }
+.refs {
+  list-style: none; margin: 0; padding: clamp(18px, 3vh, 30px) 0 0;
+  border-top: 1px solid var(--rule);
+  font-size: clamp(13px, .82vw, 16px); line-height: 1.5; color: var(--ink-2);
+}
+.refs li { break-inside: avoid; margin: 0 0 1em; padding-left: 1.8em; text-indent: -1.8em; overflow-wrap: anywhere; }
+.refs a { display: inline-block; max-width: 100%; text-indent: 0; color: inherit; text-decoration: underline; text-decoration-color: var(--rule); text-decoration-thickness: 1px; text-underline-offset: .22em; transition: color .25s, text-decoration-color .25s; }
+.refs a:hover, .refs a:focus-visible { color: var(--copper); text-decoration-color: currentColor; }
+@media (min-width: 760px) { .refs { columns: 2; column-gap: clamp(28px, 4vw, 72px); } }
+@media (min-width: 1100px) { .sources-inner { grid-template-columns: minmax(230px, 21%) 1fr; column-gap: clamp(40px, 5vw, 96px); align-items: start; } }
+
 /* ---------- Presenters ---------- */
 .credits {
   position: relative;
@@ -632,6 +653,35 @@ body.is-locked { overflow: hidden; }
         </div>
       </section>
 
+      <section class="sources" id="sources" aria-labelledby="sources-title">
+        <div class="sources-inner">
+          <header class="sources-head">
+            <p class="eyebrow">References</p>
+            <h2 id="sources-title">Sources</h2>
+            <p class="sources-lead">The books, papers and documentation behind this presentation.</p>
+          </header>
+          <ol class="refs">
+            <li>Anthropic. (n.d.). <i>Prompt engineering overview</i>. Claude Platform Docs. Retrieved November 13, 2026, from <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview" target="_blank" rel="noopener">https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview</a></li>
+            <li>Association for Computing Machinery. (2018). <i>ACM code of ethics and professional conduct</i>. <a href="https://www.acm.org/code-of-ethics" target="_blank" rel="noopener">https://www.acm.org/code-of-ethics</a></li>
+            <li>Campbell, M., Hoane, A. J., Jr., &amp; Hsu, F.-h. (2002). Deep Blue. <i>Artificial Intelligence, 134</i>(1–2), 57–83. <a href="https://doi.org/10.1016/S0004-3702(01)00129-1" target="_blank" rel="noopener">https://doi.org/10.1016/S0004-3702(01)00129-1</a></li>
+            <li>Gomez-Uribe, C. A., &amp; Hunt, N. (2015). The Netflix recommender system: Algorithms, business value, and innovation. <i>ACM Transactions on Management Information Systems, 6</i>(4), Article 13. <a href="https://doi.org/10.1145/2843948" target="_blank" rel="noopener">https://doi.org/10.1145/2843948</a></li>
+            <li>Ji, Z., Lee, N., Frieske, R., Yu, T., Su, D., Xu, Y., Ishii, E., Bang, Y. J., Madotto, A., &amp; Fung, P. (2023). Survey of hallucination in natural language generation. <i>ACM Computing Surveys, 55</i>(12), Article 248. <a href="https://doi.org/10.1145/3571730" target="_blank" rel="noopener">https://doi.org/10.1145/3571730</a></li>
+            <li>Krizhevsky, A., Sutskever, I., &amp; Hinton, G. E. (2012). ImageNet classification with deep convolutional neural networks. In <i>Advances in neural information processing systems 25</i> (pp. 1097–1105). Curran Associates. <a href="https://papers.nips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html" target="_blank" rel="noopener">https://papers.nips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html</a></li>
+            <li>LeCun, Y., Bengio, Y., &amp; Hinton, G. (2015). Deep learning. <i>Nature, 521</i>(7553), 436–444. <a href="https://doi.org/10.1038/nature14539" target="_blank" rel="noopener">https://doi.org/10.1038/nature14539</a></li>
+            <li>McCarthy, J., Minsky, M. L., Rochester, N., &amp; Shannon, C. E. (2006). A proposal for the Dartmouth summer research project on artificial intelligence, August 31, 1955. <i>AI Magazine, 27</i>(4), 12–14. <a href="https://doi.org/10.1609/aimag.v27i4.1904" target="_blank" rel="noopener">https://doi.org/10.1609/aimag.v27i4.1904</a></li>
+            <li>Mehrabi, N., Morstatter, F., Saxena, N., Lerman, K., &amp; Galstyan, A. (2021). A survey on bias and fairness in machine learning. <i>ACM Computing Surveys, 54</i>(6), Article 115. <a href="https://doi.org/10.1145/3457607" target="_blank" rel="noopener">https://doi.org/10.1145/3457607</a></li>
+            <li>Microsoft. (n.d.). <i>Tutorial: Generate and consume async streams using C# and .NET</i>. Microsoft Learn. Retrieved November 13, 2026, from <a href="https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/generate-consume-asynchronous-stream" target="_blank" rel="noopener">https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/generate-consume-asynchronous-stream</a></li>
+            <li>National Institute of Standards and Technology. (2023). <i>Artificial intelligence risk management framework (AI RMF 1.0)</i> (NIST AI 100-1). U.S. Department of Commerce. <a href="https://doi.org/10.6028/NIST.AI.100-1" target="_blank" rel="noopener">https://doi.org/10.6028/NIST.AI.100-1</a></li>
+            <li>OpenAI. (n.d.). <i>What are tokens and how to count them?</i> OpenAI Help Center. Retrieved November 13, 2026, from <a href="https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them" target="_blank" rel="noopener">https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them</a></li>
+            <li>OpenAI. (2022, November 30). <i>Introducing ChatGPT</i>. <a href="https://openai.com/index/chatgpt/" target="_blank" rel="noopener">https://openai.com/index/chatgpt/</a></li>
+            <li>Peng, S., Kalliamvakou, E., Cihon, P., &amp; Demirer, M. (2023). <i>The impact of AI on developer productivity: Evidence from GitHub Copilot</i>. arXiv. <a href="https://arxiv.org/abs/2302.06590" target="_blank" rel="noopener">https://arxiv.org/abs/2302.06590</a></li>
+            <li>Russell, S., &amp; Norvig, P. (2021). <i>Artificial intelligence: A modern approach</i> (4th ed.). Pearson.</li>
+            <li>Turing, A. M. (1950). Computing machinery and intelligence. <i>Mind, 59</i>(236), 433–460. <a href="https://doi.org/10.1093/mind/LIX.236.433" target="_blank" rel="noopener">https://doi.org/10.1093/mind/LIX.236.433</a></li>
+            <li>Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., &amp; Polosukhin, I. (2017). Attention is all you need. In <i>Advances in neural information processing systems 30</i> (pp. 5998–6008). Curran Associates. <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">https://arxiv.org/abs/1706.03762</a></li>
+          </ol>
+        </div>
+      </section>
+
       <section class="credits" id="credits" aria-labelledby="credits-title">
         <div class="credits-inner">
           <p class="eyebrow" id="credits-title">Presented by</p>
@@ -714,6 +764,7 @@ body.is-locked { overflow: hidden; }
   const markers = $$(".marker");
   const loader = $("#loader");
   const credits = $("#credits");
+  const sources = $("#sources");
   const safe = $("#safe");
   const deck = $("#deck");
   const deckUi = $("#deck-ui");
@@ -1336,6 +1387,7 @@ body.is-locked { overflow: hidden; }
   let smoother = null;
   let mainTl = null;
   let deckTl = null;
+  let sourcesSt = null;
   let target = null;
   let goTween = null;
 
@@ -1353,6 +1405,14 @@ body.is-locked { overflow: hidden; }
     if (!stage.classList.contains("no-head")) out.push(labelY(mainTl, "contents-shown"));
     parts.forEach((p, i) => out.push(labelY(mainTl, "part-" + i)));
     if (deckTl && deckTl.scrollTrigger) slides.forEach((s, i) => out.push(labelY(deckTl, "slide-" + i)));
+    if (sourcesSt) {
+      // The reference list: one stop when it fits the screen, otherwise a stop for every screenful.
+      const a = Math.round(sourcesSt.start), b = Math.round(sourcesSt.end);
+      if (b - a > window.innerHeight * 0.1) {
+        const steps = Math.ceil((b - a) / (window.innerHeight * 0.85));
+        for (let k = 0; k <= steps; k++) out.push(Math.round(a + (b - a) * k / steps));
+      } else out.push(Math.max(a, b));
+    }
     out.push(Math.round(ScrollTrigger.maxScroll(window)));
     return out;
   }
@@ -1520,6 +1580,21 @@ body.is-locked { overflow: hidden; }
     });
     tl.to({}, { duration: 1.2 }, "part-" + (parts.length - 1));   // a beat on the finished contents before the page moves on
 
+    buildDeck();
+
+    // What follows the deck is set up after it, so that these triggers are measured below its pinned distance.
+    if (sources) {
+      sourcesSt = ScrollTrigger.create({ trigger: sources, start: "top top", end: "bottom bottom" });
+      const stl = gsap.timeline({
+        defaults: { ease: "expo.out" },
+        scrollTrigger: { trigger: sources, start: "top 70%", toggleActions: "play none none reverse" },
+      });
+      stl.fromTo(".sources .eyebrow", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.8 }, 0);
+      rise(stl, $("#sources-title"), 0.08, 0.05, 1.1);
+      stl.fromTo(".sources-lead", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.8 }, 0.25)
+         .fromTo(".refs", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 1.1 }, 0.3);
+    }
+
     // Presenters: a short reveal that plays once as the section comes into view.
     const ctl = gsap.timeline({
       defaults: { ease: "expo.out" },
@@ -1530,7 +1605,6 @@ body.is-locked { overflow: hidden; }
     ctl.fromTo(".credits-rule", { scaleX: 0 }, { scaleX: 1, duration: 1, ease: "power3.inOut" }, 0.45)
        .fromTo(".thanks", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.8 }, 0.6);
 
-    buildDeck();
     buildCursor();
 
     // Every refresh (resize, rotation, fullscreen, late fonts) re-measures the layout. The pinned distances change
