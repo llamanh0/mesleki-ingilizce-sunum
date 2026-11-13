@@ -1662,7 +1662,7 @@ body.is-locked { overflow: hidden; }
   /* ---------------- Slides ---------------- */
   // One pinned section and one scrubbed timeline with a stop on every slide. Its position also tells the figure
   // which shape to form and on which side to stand.
-  const deckState = { pos: 0, gather: 0 };
+  const deckState = { pos: 0, gather: 0, leave: 0 };
   const pointer = { x: 0, y: 0, force: 0 };
   const figureBox = { wide: true, x: 0.735, y: 0.5, w: 0.4, h: 0.74 };
   const sideOf = (slide) => (slide % 2 ? 0.265 : 0.735);       // the figure alternates: right, left, right…
@@ -1678,7 +1678,7 @@ body.is-locked { overflow: hidden; }
     const m = ease(clamp((f - 0.18) / 0.72, 0, 1));            // changes happen between the stops, not on them
     if (figure) {
       figure.progress(deckState.pos);
-      figure.gather(deckState.gather);
+      figure.gather(deckState.gather * (1 - deckState.leave));
       if (figureBox.wide) {
         figureBox.x = lerp(sideOf(k), sideOf(Math.min(last, k + 1)), m);
         figure.place(figureBox);
@@ -1730,7 +1730,13 @@ body.is-locked { overflow: hidden; }
     deck.dataset.layout = wideQuery.matches ? "wide" : "narrow";
     try {
       if (window.Figures && window.THREE) {
-        figure = window.Figures.create($("#figure"), { figures: slides.map((s) => s.dataset.figure), count: FINE ? 15000 : 9000 });
+        const chapterOf = (s) => $(".chapter .num", s).textContent;
+        figure = window.Figures.create($("#figure"), {
+          figures: slides.map((s) => s.dataset.figure),
+          turns: slides.slice(1).map((s, i) => chapterOf(s) !== chapterOf(slides[i])),      // a new chapter: the figure turns once
+          count: FINE ? 15000 : 9000,
+          dust: FINE ? 300 : 160,
+        });
       }
     } catch (e) { figure = null; }
     if (!figure) $("#figure").style.display = "none";
@@ -1820,6 +1826,12 @@ body.is-locked { overflow: hidden; }
       }
     });
     dtl.to({}, { duration: 0.4 }, n - 1);        // a beat on the last slide before the page moves on
+
+    // Leaving the deck: the last figure comes apart again as the section scrolls away.
+    gsap.timeline({
+      defaults: { ease: "none" },
+      scrollTrigger: { trigger: deck, start: () => dtl.scrollTrigger.end, end: () => "+=" + Math.round(window.innerHeight * 0.8), scrub: 0.8, invalidateOnRefresh: true },
+    }).fromTo(deckState, { leave: 0 }, { leave: 1, duration: 1, onUpdate: deckChanged }, 0);
 
     // The figure is only drawn while the section is on screen.
     if (figure) {
