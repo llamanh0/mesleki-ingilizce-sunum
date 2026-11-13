@@ -364,10 +364,9 @@
     "uniform float uPx;",
     "uniform float uMinPx;",
     "uniform vec2 uDepth;",
-    "uniform vec4 uTrail[TRAIL];", // where the pointer has just been: xyz = its ray in view space, w = how hard it still pushes
-    "uniform vec3 uDrag[TRAIL];",  // …and which way it was moving there
-    "uniform vec3 uRay;",          // where the pointer is now
-    "uniform float uHover;",       // 0…1: a pointer is over the canvas
+    "uniform vec3 uRay;",          // a point that trails the pointer: its ray in view space
+    "uniform vec3 uDrag;",         // the way it is moving, scaled by how fast (0 when it rests)
+    "uniform float uPush;",        // 0…1: how fast it is moving
     "uniform float uReach;",       // radius of its influence
     "varying float vAccent;",
     "varying float vAlpha;",
@@ -392,24 +391,14 @@
     "  g = g * g * (3.0 - 2.0 * g);",
     "  p = mix(dir * (2.4 + aSeed.x * 2.4), p, g);",
     "  vec4 mv = modelViewMatrix * vec4(p, 1.0);",
-    // The pointer stirs the figure: along its recent path the points are carried with the movement and pushed
-    // aside, the faster the harder, and they swing back as that stretch of the path fades. A resting pointer
-    // moves nothing; the points near it only light up.
-    "  vec3 shove = vec3(0.0);",
-    "  float heat = 0.0;",
-    "  for (int i = 0; i < TRAIL; i++) {",
-    "    vec3 ray = uTrail[i].xyz;",
-    "    vec3 off = mv.xyz - ray * dot(mv.xyz, ray);",
-    "    float fall = 1.0 - smoothstep(0.0, uReach, length(off));",
-    "    float w = fall * fall * uTrail[i].w;",
-    "    shove += (normalize(off + 0.0001) * 0.5 + uDrag[i]) * w;",
-    "    heat += abs(w);",
-    "  }",
-    "  shove /= 1.0 + length(shove) * 0.55;",                            // many small pushes never add up to a blast
-    "  mv.xyz += shove * uReach * (0.5 + aSeed.z);",
-    "  vec3 here = mv.xyz - uRay * dot(mv.xyz, uRay);",
-    "  float glow = (1.0 - smoothstep(0.0, uReach * 0.8, length(here))) * uHover;",
-    "  float lit = clamp(heat * 1.4 + glow * 0.75, 0.0, 1.0);",
+    // The pointer leaves a soft wake: the points around it are carried a little way with its movement and lean
+    // aside. The push comes from a point that trails the pointer and from its smoothed speed, so it builds up
+    // and dies away without a jump. A resting pointer moves nothing.
+    "  vec3 off = mv.xyz - uRay * dot(mv.xyz, uRay);",
+    "  float fall = 1.0 - smoothstep(0.0, uReach, length(off));",
+    "  fall *= fall;",
+    "  mv.xyz += (normalize(off + 0.0001) * 0.3 * uPush + uDrag * 0.55) * fall * uReach * (0.6 + 0.8 * aSeed.z);",
+    "  float lit = fall * uPush * 0.12;",                                // barely a change of colour
     "  gl_Position = projectionMatrix * mv;",
     "  float accent = max(mix(aFrom.w, aTo.w, t), lit);",
     "  vAccent = accent;",
@@ -419,7 +408,6 @@
     "  vAlpha = mix(1.0, 0.3, depth) * g * (1.0 - 0.3 * arc);",
     "}",
   ].join("\n");
-  const TRAIL = 20;              // samples of the pointer's path that are kept
 
   const FRAG = [
     "uniform vec3 uInk;",
@@ -466,7 +454,6 @@
     const FOV = 30;
     const DIST = 7.5;
     const material = new T.ShaderMaterial({
-      defines: { TRAIL: TRAIL },
       vertexShader: VERT,
       fragmentShader: FRAG,
       transparent: true,
@@ -475,8 +462,8 @@
       blending: T.NormalBlending,
       uniforms: {
         uMix: { value: 0 }, uGather: { value: 0 }, uTime: { value: 0 },
-        uStyle: { value: [1, 0, 0, 0] }, uRay: { value: new T.Vector3(0, 0, -1) }, uHover: { value: 0 }, uReach: { value: 0.5 },
-        uTrail: { value: new Float32Array(TRAIL * 4) }, uDrag: { value: new Float32Array(TRAIL * 3) },
+        uStyle: { value: [1, 0, 0, 0] }, uRay: { value: new T.Vector3(0, 0, -1) }, uDrag: { value: new T.Vector3() },
+        uPush: { value: 0 }, uReach: { value: 0.34 },
         uSize: { value: 0.0175 }, uPx: { value: 1 }, uMinPx: { value: 1 },
         uDepth: { value: new T.Vector2(DIST - 1.4, DIST + 1.6) },
         uInk: { value: new T.Color(0x161c1f) }, uAccent: { value: new T.Color(0xb4602c) },
@@ -496,54 +483,37 @@
     let wasSpinning = false;
     let angle = 0;
     let last = 0;
-    // The pointer's recent path: a ring of samples, each with the moment it was taken and how fast the pointer was
-    const trail = [];
-    for (let i = 0; i < TRAIL; i++) trail.push({ born: -100, power: 0 });
-    let head = 0;
-    let lastSample = null;       // { x, y, time } of the newest sample
-    let hover = 0;
     const SIZE = 0.0145;   // diameter of a point, in figure units
     let box = { x: 0.5, y: 0.5, w: 0.5, h: 0.7 };
     const look = { x: 0, y: 0 };
 
-    // Record the pointer's path and hand it to the shader. pointer.force: 0 = no pointer (touch, or outside the window)
-    const ray = new T.Vector3();
-    function stir(time, pointer) {
+    // A point that trails the pointer, and its smoothed speed. Everything is eased per frame, so nothing ever jumps.
+    const follow = { x: 0, y: 0, vx: 0, vy: 0, power: 0, on: false };
+    function stir(dt, pointer) {
       const u = material.uniforms;
-      const on = pointer && pointer.force ? 1 : 0;
-      hover += (on - hover) * 0.1;
-      u.uHover.value = hover;
-      u.uReach.value = 0.5 * group.scale.x;
-      const half = Math.tan((FOV * Math.PI) / 360);
       const aspect = width / height;
-      if (on) {
-        ray.set(pointer.x * half * aspect, -pointer.y * half, -1).normalize();
-        u.uRay.value.copy(ray);
-        if (!lastSample) lastSample = { x: pointer.x, y: pointer.y, time: time };
-        const dt = time - lastSample.time;
-        const dx = (pointer.x - lastSample.x) * aspect;
-        const dy = -(pointer.y - lastSample.y);
-        const moved = Math.hypot(dx, dy);
-        if (dt > 0.045 && moved > 0.004) {              // a new stretch of path, about 20 times a second
-          const speed = moved / Math.min(dt, 0.25);     // screen heights per second, roughly
-          head = (head + 1) % TRAIL;
-          const s = trail[head];
-          s.born = time;
-          s.power = clamp(speed / 2.2, 0, 1);
-          u.uTrail.value.set([ray.x, ray.y, ray.z], head * 4);
-          u.uDrag.value.set([dx / moved, dy / moved, 0], head * 3);
-          lastSample.x = pointer.x; lastSample.y = pointer.y; lastSample.time = time;
-        } else if (dt > 0.3) {                          // resting: the next movement starts from here
-          lastSample.x = pointer.x; lastSample.y = pointer.y; lastSample.time = time;
-        }
+      const half = Math.tan((FOV * Math.PI) / 360);
+      let vx = 0, vy = 0;
+      if (pointer && pointer.force && dt > 0) {       // pointer.force: 0 = no pointer (touch, or outside the window)
+        if (!follow.on) { follow.on = true; follow.x = pointer.x; follow.y = pointer.y; }
+        const k = 1 - Math.exp(-dt * 9);
+        const dx = (pointer.x - follow.x) * k;
+        const dy = (pointer.y - follow.y) * k;
+        follow.x += dx; follow.y += dy;
+        vx = (dx * aspect) / dt;                       // in screen heights per second
+        vy = -dy / dt;
       } else {
-        lastSample = null;
+        follow.on = false;
       }
-      // Every stretch fades, with one soft swing back past the resting place.
-      for (let i = 0; i < TRAIL; i++) {
-        const age = time - trail[i].born;
-        u.uTrail.value[i * 4 + 3] = age > 2.4 ? 0 : trail[i].power * Math.exp(-3.0 * age) * Math.cos(4.2 * age);
-      }
+      const kv = 1 - Math.exp(-dt * 6);
+      follow.vx += (vx - follow.vx) * kv;
+      follow.vy += (vy - follow.vy) * kv;
+      const speed = Math.hypot(follow.vx, follow.vy);
+      follow.power += (clamp(speed / 1.4, 0, 1) - follow.power) * kv;
+      u.uRay.value.set(follow.x * half * aspect, -follow.y * half, -1).normalize();
+      u.uDrag.value.set(follow.vx, follow.vy, 0).multiplyScalar(speed > 0.0001 ? follow.power / speed : 0);
+      u.uPush.value = follow.power;
+      u.uReach.value = 0.38 * group.scale.x;
     }
 
     function layout() {
@@ -606,7 +576,7 @@
         group.rotation.y = Math.sin(time * 0.42) * 0.52 * (1 - spin) + angle * spin + look.x * 0.28;
         group.rotation.x = 0.1 + Math.sin(time * 0.23) * 0.05 + look.y * 0.14;
         material.uniforms.uTime.value = time;
-        stir(time, pointer);
+        stir(dt, pointer);
         renderer.render(scene, camera);
       },
       dispose() { geometry.dispose(); material.dispose(); renderer.dispose(); },

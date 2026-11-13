@@ -336,10 +336,9 @@ body.is-locked { overflow: hidden; }
 .cursor-ring::after { border: 1px solid rgba(16, 20, 21, .5); }
 .cursor.is-link .cursor-ring::after { transform: scale(1.55); background: rgba(122, 68, 38, .14); border-color: var(--copper); }
 .cursor.is-link .cursor-dot::after { transform: scale(0); }
-.cursor.is-force .cursor-ring::after { transform: scale(2.7); border-color: rgba(122, 68, 38, .55); }   /* over the figure: its reach */
-.cursor.is-force .cursor-dot::after { background: var(--copper); }
+.cursor.is-force .cursor-ring::after { transform: scale(1.7); }   /* over the figure */
 .cursor.is-down .cursor-ring::after { transform: scale(.7); }
-.cursor.is-down.is-force .cursor-ring::after { transform: scale(2.2); }
+.cursor.is-down.is-force .cursor-ring::after { transform: scale(1.3); }
 .has-cursor, .has-cursor * { cursor: none !important; }
 :root:fullscreen.is-resting .cursor { opacity: 0; }
 
@@ -1610,6 +1609,7 @@ body.is-locked { overflow: hidden; }
     deck.dataset.layout = wide ? "wide" : "narrow";
     if (!figure) return;
     figure.resize(w, h, Math.min(window.devicePixelRatio || 1, 2));
+    figureBox.cw = w; figureBox.ch = h;
     const k = uh / h;                            // the text lives in the always-visible part of the section
     figureBox.wide = wide;
     if (wide) {
@@ -1727,7 +1727,7 @@ body.is-locked { overflow: hidden; }
     });
     dtl.to({}, { duration: 0.4 }, n - 1);        // a beat on the last slide before the page moves on
 
-    // The figure is only drawn while the section is on screen. With a mouse, its points give way to the pointer.
+    // The figure is only drawn while the section is on screen.
     if (figure) {
       const seen = () => {
         const st = dtl.scrollTrigger;
@@ -1735,21 +1735,6 @@ body.is-locked { overflow: hidden; }
         const h = window.innerHeight;
         return y > st.start - h && y < st.end + h;
       };
-      if (FINE) {
-        window.addEventListener("pointermove", (e) => {
-          if (e.pointerType && e.pointerType !== "mouse") return;
-          const r = deck.getBoundingClientRect();
-          pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-          pointer.y = ((e.clientY - r.top) / r.height) * 2 - 1;
-          pointer.force = 1;
-          // near the figure the ring of the pointer opens up to the reach of its push
-          const dx = (e.clientX - r.left) / r.width - figureBox.x;
-          const dy = ((e.clientY - r.top) / r.height - figureBox.y) * (r.height / r.width);
-          const near = Math.hypot(dx, dy) < figureBox.w * 0.42 && r.top < 4 && r.bottom > window.innerHeight * 0.7;
-          $("#cursor").classList.toggle("is-force", near);
-        }, { passive: true });
-        document.documentElement.addEventListener("mouseleave", () => { pointer.force = 0; });
-      }
       gsap.ticker.add((time) => { if (seen()) figure.render(time, pointer); });
     }
     deckChanged();
@@ -1757,45 +1742,85 @@ body.is-locked { overflow: hidden; }
   }
 
   /* ---------------- Pointer ---------------- */
-  // A dot at the pointer and a ring that follows a moment later. Only with a mouse.
+  // With a mouse: a dot at the pointer, a ring that follows a moment later, a button that leans towards it and a
+  // figure that feels it pass. The mouse event only notes where the pointer is; all the work is done once per frame.
+  const mouse = { x: 0, y: 0, inside: false, moved: false };
   function buildCursor() {
     const cursor = $("#cursor");
     if (!cursor || !FINE) return;
     const dot = $(".cursor-dot", cursor);
     const ring = $(".cursor-ring", cursor);
-    const dotX = gsap.quickSetter(dot, "x", "px");
-    const dotY = gsap.quickSetter(dot, "y", "px");
-    const ringX = gsap.quickTo(ring, "x", { duration: 0.45, ease: "power3" });
-    const ringY = gsap.quickTo(ring, "y", { duration: 0.45, ease: "power3" });
-    // The full-screen button leans towards the pointer when it comes close.
-    const lean = fsBtn && fsBtn.classList.contains("is-ready")
-      ? { x: gsap.quickTo(fsBtn, "x", { duration: 0.5, ease: "power3" }), y: gsap.quickTo(fsBtn, "y", { duration: 0.5, ease: "power3" }) }
-      : null;
-    let placed = false;
+    const magnet = fsBtn && fsBtn.classList.contains("is-ready") ? { x: 0, y: 0, ox: 0, oy: 0 } : null;   // centre of the button, and how far it leans
+    const locate = () => {
+      if (!magnet) return;
+      const r = fsBtn.getBoundingClientRect();
+      magnet.x = r.left + r.width / 2 - magnet.ox;
+      magnet.y = r.top + r.height / 2 - magnet.oy;
+    };
+    locate();
+    ScrollTrigger.addEventListener("refresh", locate);
+    window.addEventListener("resize", locate);
+
     window.addEventListener("pointermove", (e) => {
       if (e.pointerType && e.pointerType !== "mouse") return;
-      if (lean) {
-        const r = fsBtn.getBoundingClientRect();
-        const dx = e.clientX - (r.left + r.width / 2 - gsap.getProperty(fsBtn, "x"));
-        const dy = e.clientY - (r.top + r.height / 2 - gsap.getProperty(fsBtn, "y"));
-        const close = Math.hypot(dx, dy) < 84;
-        lean.x(close ? dx * 0.35 : 0);
-        lean.y(close ? dy * 0.35 : 0);
-      }
-      if (!placed) {                               // first sign of a mouse: take over from the system pointer
-        placed = true;
-        root.classList.add("has-cursor");
-        gsap.set(ring, { x: e.clientX, y: e.clientY });
-      }
-      dotX(e.clientX); dotY(e.clientY);
-      ringX(e.clientX); ringY(e.clientY);
-      cursor.classList.add("is-on");
+      mouse.x = e.clientX; mouse.y = e.clientY; mouse.inside = true; mouse.moved = true;
+    }, { passive: true });
+    document.documentElement.addEventListener("mouseleave", () => { mouse.inside = false; mouse.moved = true; });
+    document.addEventListener("pointerover", (e) => {
       cursor.classList.toggle("is-link", !!(e.target && e.target.closest && e.target.closest("button, a")));
     }, { passive: true });
     window.addEventListener("pointerdown", () => cursor.classList.add("is-down"), { passive: true });
     window.addEventListener("pointerup", () => cursor.classList.remove("is-down"), { passive: true });
-    document.documentElement.addEventListener("mouseleave", () => cursor.classList.remove("is-on"));
-    document.addEventListener("scroll", () => { if (!deckTl || currentY() < deckTl.scrollTrigger.start - 4) cursor.classList.remove("is-force"); }, { passive: true });
+
+    let started = false;
+    let last = 0;
+    let rx = 0, ry = 0;
+    let force = false;
+    gsap.ticker.add((time) => {
+      const dt = Math.min(0.1, Math.max(0, time - last));
+      last = time;
+      if (!started) {
+        if (!mouse.moved) return;
+        started = true;                            // first sign of a mouse: take over from the system pointer
+        root.classList.add("has-cursor");
+        rx = mouse.x; ry = mouse.y;
+      }
+      if (mouse.moved) {
+        dot.style.transform = "translate3d(" + mouse.x + "px," + mouse.y + "px,0)";
+        cursor.classList.toggle("is-on", mouse.inside);
+      }
+      const k = 1 - Math.exp(-dt * 11);
+      if (Math.abs(mouse.x - rx) + Math.abs(mouse.y - ry) > 0.05) {
+        rx += (mouse.x - rx) * k; ry += (mouse.y - ry) * k;
+        ring.style.transform = "translate3d(" + rx.toFixed(2) + "px," + ry.toFixed(2) + "px,0)";
+      }
+      if (magnet) {
+        const dx = mouse.x - magnet.x;
+        const dy = mouse.y - magnet.y;
+        const close = mouse.inside && Math.hypot(dx, dy) < 84;
+        const tx = close ? dx * 0.35 : 0;
+        const ty = close ? dy * 0.35 : 0;
+        if (Math.abs(tx - magnet.ox) + Math.abs(ty - magnet.oy) > 0.05) {
+          magnet.ox += (tx - magnet.ox) * k * 0.7; magnet.oy += (ty - magnet.oy) * k * 0.7;
+          fsBtn.style.transform = "translate3d(" + magnet.ox.toFixed(2) + "px," + magnet.oy.toFixed(2) + "px,0)";
+        }
+      }
+      // Where the pointer is on the slides, for the figure; near the figure the ring opens up a little.
+      let near = false;
+      if (figure && deckTl && figureBox.cw) {
+        const st = deckTl.scrollTrigger;
+        const y = currentY();
+        const top = y < st.start ? st.start - y : y > st.end ? st.end - y : 0;
+        const u = mouse.x / figureBox.cw;
+        const v = (mouse.y - top) / figureBox.ch;
+        pointer.x = u * 2 - 1;
+        pointer.y = v * 2 - 1;
+        pointer.force = mouse.inside ? 1 : 0;
+        near = mouse.inside && top === 0 && Math.hypot(u - figureBox.x, (v - figureBox.y) * (figureBox.ch / figureBox.cw)) < figureBox.w * 0.42;
+      }
+      if (near !== force) { force = near; cursor.classList.toggle("is-force", near); }
+      mouse.moved = false;
+    });
   }
 
   function maybeReveal() {
