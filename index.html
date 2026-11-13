@@ -249,30 +249,16 @@ body.is-locked { overflow: hidden; }
 .prompt { margin: 1.4em 0 0; padding: .1em 0 .1em 1.3em; border-left: 2px solid var(--rule); font-family: var(--font-mono); font-size: clamp(13px, min(1.08vw, 2.15vh), 20px); line-height: 1.55; color: var(--ink); text-wrap: pretty; }
 .prompt.is-better { border-left-color: var(--copper); }
 .prompt + .prompt { margin-top: 1em; }
-.prompt-size { display: block; margin-top: .7em; font-size: .78em; letter-spacing: .1em; text-transform: uppercase; color: var(--copper); }
-.tag { margin: 1.5em 0 0; font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--copper); }
-.tag + :is(.lead, .prompt, .points) { margin-top: .8em; }
-.facts { margin: 1.4em 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .7em 1.4em; font-size: clamp(15px, min(1.3vw, 2.5vh), 24px); line-height: 1.36; }
-.facts dt { font-family: var(--font-mono); font-size: .76em; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--copper); padding-top: .32em; }
-.facts dd { margin: 0; }
-/* Next-token example: candidates and how likely each one is */
-.odds { list-style: none; margin: 1.3em 0 0; padding: 0; display: grid; gap: .55em; font-family: var(--font-mono); font-size: clamp(13px, min(1.08vw, 2.15vh), 20px); }
-.odds li { display: grid; grid-template-columns: 6.2em minmax(0, 1fr) 3.2em; align-items: center; column-gap: .9em; }
-.odds .bar { height: .5em; border-radius: .25em; background: var(--rule); overflow: hidden; }
-.odds .bar i { display: block; height: 100%; width: var(--p); border-radius: inherit; background: var(--ink); }
-.odds li:first-child .bar i { background: var(--copper); }
-.odds .pct { text-align: right; color: var(--ink-2); }
-
-/* Panels: a slide can hold several; the deck steps through them sideways. Without scripts they simply follow each other. */
-.panel + .panel { margin-top: 2em; }
-.pager { display: none; }
-.deck.is-live .panels { display: grid; }
-.deck.is-live .panel { grid-area: 1 / 1; margin: 0; }
-.deck.is-live .panel > :first-child { margin-top: 1.4em; }
-.deck.is-live .pager { margin-top: clamp(18px, 3.4vh, 36px); display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: clamp(10px, .7vw, 13px); letter-spacing: .12em; color: var(--ink-2); }
-.pager i { width: 6px; height: 6px; border-radius: 3px; background: var(--rule); transition: width .5s cubic-bezier(.2, .7, .2, 1), background-color .5s ease; }
-.pager i.is-on { width: 22px; background: var(--copper); }
-.pager span { margin-left: 8px; }
+.tag { margin: 1.4em 0 0; font-family: var(--font-mono); font-size: var(--fs-label); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--copper); }
+.tag + .prompt { margin-top: .7em; }
+/* A huge outlined chapter number that crosses the screen whenever the chapter changes */
+.ghost { display: none; }
+.deck.is-live .ghost {
+  display: block; position: absolute; left: 50%; top: 50%; visibility: hidden; pointer-events: none; white-space: nowrap;
+  font-size: min(78vh, 52vw); font-weight: 600; line-height: 1; letter-spacing: -.05em;
+  color: transparent; -webkit-text-stroke: 1.5px rgba(122, 68, 38, .5);
+}
+@supports not (-webkit-text-stroke: 1px black) { .deck.is-live .ghost { color: rgba(122, 68, 38, .1); } }
 
 .deck.is-live {
   height: 100vh; height: 100lvh; overflow: hidden;
@@ -293,10 +279,8 @@ body.is-locked { overflow: hidden; }
 .deck[data-layout="narrow"] .slide h2 { font-size: clamp(25px, 6.6vw, 46px); }
 .deck[data-layout="narrow"] .lead { font-size: clamp(15px, 3.4vw, 22px); }
 .deck[data-layout="narrow"] :is(.points, .timeline) { font-size: clamp(14px, 3.1vw, 20px); gap: .5em; }
-.deck[data-layout="narrow"] :is(.lead, .points, .timeline, .cols, .prompt, .note, .tag, .facts, .odds) { margin-top: 1em; }
-.deck[data-layout="narrow"] .panel > :first-child { margin-top: 1em; }
-.deck[data-layout="narrow"] :is(.facts, .odds) { font-size: clamp(13px, 3vw, 19px); }
-.deck[data-layout="narrow"] .facts { gap: .5em 1em; }
+.deck[data-layout="narrow"] :is(.lead, .points, .timeline, .cols, .prompt, .note, .tag) { margin-top: 1em; }
+.deck[data-layout="narrow"] .tag + .prompt { margin-top: .6em; }
 .deck[data-layout="narrow"] .note { padding-top: .8em; font-size: clamp(13px, 2.8vw, 18px); }
 .deck[data-layout="narrow"] .prompt { font-size: clamp(12px, 2.9vw, 17px); padding-left: 1em; }
 @media (max-height: 540px) and (min-aspect-ratio: 6/5) {      /* a phone on its side */
@@ -306,12 +290,10 @@ body.is-locked { overflow: hidden; }
   .deck .slide h2 { font-size: clamp(19px, 6.6vh, 34px); }
   .deck .lead { font-size: clamp(12px, 3.5vh, 16px); line-height: 1.32; }
   .deck :is(.points, .timeline) { font-size: clamp(11.5px, 3.3vh, 15px); gap: .34em; line-height: 1.3; }
-  .deck :is(.lead, .points, .timeline, .cols, .prompt, .note, .tag, .facts, .odds) { margin-top: .6em; }
-  .deck.is-live .panel > :first-child { margin-top: .6em; }
+  .deck :is(.lead, .points, .timeline, .cols, .prompt, .note, .tag) { margin-top: .6em; }
+  .deck .tag + .prompt { margin-top: .3em; }
   .deck .note { padding-top: .6em; font-size: 11px; }
-  .deck .prompt { font-size: 11px; line-height: 1.4; }
-  .deck :is(.facts, .odds) { font-size: 11.5px; gap: .3em 1em; }
-  .deck.is-live .pager { margin-top: 8px; }
+  .deck .prompt { font-size: 10.5px; line-height: 1.38; }
   .deck.is-live .deck-hud { bottom: calc(var(--sb) + 10px); }
 }
 .deck.is-live .deck-hud {
@@ -338,6 +320,28 @@ body.is-locked { overflow: hidden; }
 :root:fullscreen .fs-btn .icon-exit { display: block; }
 :root:fullscreen.is-resting { cursor: none; }                 /* presenting: pointer and button step aside when idle */
 :root:fullscreen.is-resting .fs-btn { opacity: 0; }
+
+/* ---------- Pointer ----------
+   With a mouse, the system pointer gives way to a dot and a ring that trails it. The ring answers to what is under it. */
+.cursor { position: fixed; left: 0; top: 0; z-index: 40; pointer-events: none; opacity: 0; transition: opacity .3s ease; }
+.cursor.is-on { opacity: 1; }
+.cursor i { position: absolute; left: 0; top: 0; display: block; border-radius: 50%; will-change: transform; }
+.cursor-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; }
+.cursor-ring { width: 38px; height: 38px; margin: -19px 0 0 -19px; }
+.cursor-dot::after, .cursor-ring::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  transition: transform .5s cubic-bezier(.2, .7, .2, 1), background-color .3s ease, border-color .3s ease, opacity .3s ease;
+}
+.cursor-dot::after { background: var(--ink); }
+.cursor-ring::after { border: 1px solid rgba(16, 20, 21, .5); }
+.cursor.is-link .cursor-ring::after { transform: scale(1.55); background: rgba(122, 68, 38, .14); border-color: var(--copper); }
+.cursor.is-link .cursor-dot::after { transform: scale(0); }
+.cursor.is-force .cursor-ring::after { transform: scale(2.7); border-color: rgba(122, 68, 38, .55); }   /* over the figure: its reach */
+.cursor.is-force .cursor-dot::after { background: var(--copper); }
+.cursor.is-down .cursor-ring::after { transform: scale(.7); }
+.cursor.is-down.is-force .cursor-ring::after { transform: scale(2.2); }
+.has-cursor, .has-cursor * { cursor: none !important; }
+:root:fullscreen.is-resting .cursor { opacity: 0; }
 
 /* ---------- Presenters ---------- */
 .credits {
@@ -462,7 +466,7 @@ body.is-locked { overflow: hidden; }
         <div class="deck-ui" id="deck-ui">
           <article class="slide" data-figure="globe">
             <div class="slide-body">
-              <p class="chapter"><span class="num">01</span>Introduction</p>
+              <p class="chapter"><span class="num">01</span><span class="chapter-name">Introduction</span></p>
               <h2>AI is already part of the day</h2>
               <p class="lead">From unlocking a phone to finding the fastest way home, most of us rely on AI long before we stop to think about it.</p>
               <ul class="points">
@@ -475,7 +479,7 @@ body.is-locked { overflow: hidden; }
 
           <article class="slide" data-figure="network">
             <div class="slide-body">
-              <p class="chapter"><span class="num">02</span>Understanding AI</p>
+              <p class="chapter"><span class="num">02</span><span class="chapter-name">Understanding AI</span></p>
               <h2>What is AI?</h2>
               <p class="lead">Software that performs tasks we normally associate with human intelligence: recognising patterns, understanding language, making decisions.</p>
               <ul class="points">
@@ -489,7 +493,7 @@ body.is-locked { overflow: hidden; }
 
           <article class="slide" data-figure="helix">
             <div class="slide-body">
-              <p class="chapter"><span class="num">02</span>Understanding AI</p>
+              <p class="chapter"><span class="num">02</span><span class="chapter-name">Understanding AI</span></p>
               <h2>A brief history of AI</h2>
               <ol class="timeline">
                 <li><span class="year">1950</span><span>Alan Turing asks, “Can machines think?”</span></li>
@@ -504,44 +508,22 @@ body.is-locked { overflow: hidden; }
 
           <article class="slide" data-figure="phone">
             <div class="slide-body">
-              <p class="chapter"><span class="num">03</span>AI in Daily Life</p>
+              <p class="chapter"><span class="num">03</span><span class="chapter-name">AI in Daily Life</span></p>
               <h2>Everyday examples</h2>
-              <div class="panels">
-                <div class="panel">
-                  <p class="lead">Most of the AI we use never calls itself AI.</p>
-                  <ul class="points">
-                    <li><b>Recommendations:</b> what to watch, listen to or buy next.</li>
-                    <li><b>Navigation:</b> live traffic and arrival times.</li>
-                    <li><b>Communication:</b> spam filters, autocorrect, translation.</li>
-                    <li><b>Phones:</b> face unlock, voice assistants, sharper photos.</li>
-                    <li><b>Banking:</b> fraud checks on every card payment.</li>
-                  </ul>
-                </div>
-                <div class="panel">
-                  <p class="tag">Example · Navigation</p>
-                  <p class="lead">A maps app does not just know the roads. It knows how fast they are moving right now.</p>
-                  <dl class="facts">
-                    <dt>Data</dt><dd>Anonymous speed and location from phones on the road.</dd>
-                    <dt>Model</dt><dd>Predicts how the traffic will change in the next minutes.</dd>
-                    <dt>Result</dt><dd>An arrival time, and a new route when things change.</dd>
-                  </dl>
-                </div>
-                <div class="panel">
-                  <p class="tag">Example · Recommendations</p>
-                  <p class="lead">The next video is not a coincidence. It is a prediction about you.</p>
-                  <dl class="facts">
-                    <dt>Data</dt><dd>What you watched, skipped and searched for.</dd>
-                    <dt>Model</dt><dd>Finds people with similar taste, and what they enjoyed.</dd>
-                    <dt>Result</dt><dd>A ranked list that is different for every user.</dd>
-                  </dl>
-                </div>
-              </div>
+              <p class="lead">Most of the AI we use never calls itself AI.</p>
+              <ul class="points">
+                <li><b>Recommendations:</b> what to watch, listen to or buy next.</li>
+                <li><b>Navigation:</b> live traffic and arrival times.</li>
+                <li><b>Communication:</b> spam filters, autocorrect, translation.</li>
+                <li><b>Phones:</b> face unlock, voice assistants, sharper photos.</li>
+                <li><b>Banking:</b> fraud checks on every card payment.</li>
+              </ul>
             </div>
           </article>
 
           <article class="slide" data-figure="scale">
             <div class="slide-body">
-              <p class="chapter"><span class="num">03</span>AI in Daily Life</p>
+              <p class="chapter"><span class="num">03</span><span class="chapter-name">AI in Daily Life</span></p>
               <h2>Benefits and risks</h2>
               <div class="cols">
                 <div>
@@ -566,7 +548,7 @@ body.is-locked { overflow: hidden; }
 
           <article class="slide" data-figure="orbit">
             <div class="slide-body">
-              <p class="chapter"><span class="num">04</span>AI in Our Field</p>
+              <p class="chapter"><span class="num">04</span><span class="chapter-name">AI in Our Field</span></p>
               <h2>AI tools and use cases</h2>
               <p class="lead">For software engineers, AI has become part of the toolbox.</p>
               <ul class="points">
@@ -580,91 +562,47 @@ body.is-locked { overflow: hidden; }
 
           <article class="slide" data-figure="transformer">
             <div class="slide-body">
-              <p class="chapter"><span class="num">04</span>AI in Our Field</p>
+              <p class="chapter"><span class="num">04</span><span class="chapter-name">AI in Our Field</span></p>
               <h2>How LLMs work</h2>
-              <div class="panels">
-                <div class="panel">
-                  <p class="lead">A large language model does one thing: it predicts the next token, again and again.</p>
-                  <ol class="points steps">
-                    <li><b>Tokenise:</b> the text is split into tokens, small pieces of words.</li>
-                    <li><b>Embed:</b> each token becomes a list of numbers.</li>
-                    <li><b>Attend:</b> transformer layers weigh how the tokens relate to each other.</li>
-                    <li><b>Predict:</b> the model scores every possible next token and picks one.</li>
-                  </ol>
-                </div>
-                <div class="panel">
-                  <p class="tag">Example · One prediction</p>
-                  <p class="prompt is-better">The capital of Türkiye is ▍</p>
-                  <ol class="odds" aria-label="Most likely next tokens (illustrative values)">
-                    <li><span>Ankara</span><span class="bar"><i style="--p: 93%"></i></span><span class="pct">93%</span></li>
-                    <li><span>Istanbul</span><span class="bar"><i style="--p: 4%"></i></span><span class="pct">4%</span></li>
-                    <li><span>located</span><span class="bar"><i style="--p: 1.5%"></i></span><span class="pct">1%</span></li>
-                    <li><span>a</span><span class="bar"><i style="--p: 1%"></i></span><span class="pct">&lt;1%</span></li>
-                  </ol>
-                  <p class="note">The chosen token joins the text, and the model predicts again. Values are illustrative.</p>
-                </div>
-              </div>
+              <p class="lead">A large language model does one thing: it predicts the next token, again and again.</p>
+              <ol class="points steps">
+                <li><b>Tokenise:</b> the text is split into tokens, small pieces of words.</li>
+                <li><b>Embed:</b> each token becomes a list of numbers.</li>
+                <li><b>Attend:</b> transformer layers weigh how the tokens relate to each other.</li>
+                <li><b>Predict:</b> the model scores every possible next token and picks one.</li>
+              </ol>
             </div>
           </article>
 
           <article class="slide" data-figure="compare">
             <div class="slide-body">
-              <p class="chapter"><span class="num">04</span>AI in Our Field</p>
+              <p class="chapter"><span class="num">04</span><span class="chapter-name">AI in Our Field</span></p>
               <h2>Basic vs. technical prompts</h2>
-              <div class="panels">
-                <div class="panel">
-                  <p class="tag">Basic</p>
-                  <p class="prompt">Write a method that reads a file.</p>
-                  <ul class="points">
-                    <li>Which language and version? Which file format?</li>
-                    <li>Sync or async? What if the file is huge, or broken?</li>
-                    <li>The model has to guess, so the answer is generic.</li>
-                  </ul>
-                </div>
-                <div class="panel">
-                  <p class="tag">Technical</p>
-                  <p class="prompt is-better">You are a senior C# developer working with .NET 8. Write an async method ReadOrdersAsync(string path, CancellationToken ct) that streams a UTF-8 CSV file line by line and returns IAsyncEnumerable&lt;Order&gt;. Skip malformed rows and log them with ILogger. Never load the whole file into memory. Return only the code, with XML doc comments.</p>
-                </div>
-                <div class="panel">
-                  <p class="tag">What changed</p>
-                  <dl class="facts">
-                    <dt>Role</dt><dd>A senior C# developer, on .NET 8.</dd>
-                    <dt>Task</dt><dd>One method, with its exact signature.</dd>
-                    <dt>Constraints</dt><dd>Streaming, error handling, memory.</dd>
-                    <dt>Output</dt><dd>Code only, documented.</dd>
-                  </dl>
-                  <p class="note">Same model, far better answer.</p>
-                </div>
-              </div>
+              <p class="tag">Basic</p>
+              <p class="prompt">Write a method that reads a file.</p>
+              <p class="tag">Technical</p>
+              <p class="prompt is-better">You are a senior C# developer working with .NET 8. Write an async method ReadOrdersAsync(string path, CancellationToken ct) that streams a UTF-8 CSV file line by line and returns IAsyncEnumerable&lt;Order&gt;. Skip malformed rows and log them with ILogger. Never load the whole file into memory. Return only the code, with XML doc comments.</p>
+              <p class="note">Role · Task · Constraints · Output format: the same model, a far better answer.</p>
             </div>
           </article>
 
           <article class="slide" data-figure="bars">
             <div class="slide-body">
-              <p class="chapter"><span class="num">04</span>AI in Our Field</p>
+              <p class="chapter"><span class="num">04</span><span class="chapter-name">AI in Our Field</span></p>
               <h2>Token efficiency and accuracy</h2>
-              <div class="panels">
-                <div class="panel">
-                  <p class="lead">Tokens are the unit of cost, speed and memory. One token is roughly four characters of English.</p>
-                  <ul class="points">
-                    <li>Give the model what is relevant, not everything you have.</li>
-                    <li>Structure beats length: clear sections, examples, the format you expect.</li>
-                    <li>Break large tasks into smaller steps.</li>
-                    <li>Check the result: run the tests, read the sources.</li>
-                  </ul>
-                </div>
-                <div class="panel">
-                  <p class="tag">Example · The same request</p>
-                  <p class="prompt">Hello! I hope you are doing well. I was wondering if you could possibly help me out by writing, if it is not too much trouble, a C# method that would be able to check whether a given number is a prime number or not. Thank you so much in advance!<span class="prompt-size">About 60 tokens</span></p>
-                  <p class="prompt is-better">Write a C# method IsPrime(int n). Return only the code.<span class="prompt-size">About 14 tokens</span></p>
-                </div>
-              </div>
+              <p class="lead">Tokens are the unit of cost, speed and memory. One token is roughly four characters of English.</p>
+              <ul class="points">
+                <li>Give the model what is relevant, not everything you have.</li>
+                <li>Structure beats length: clear sections, examples, the format you expect.</li>
+                <li>Break large tasks into smaller steps.</li>
+                <li>Check the result: run the tests, read the sources.</li>
+              </ul>
             </div>
           </article>
 
           <article class="slide" data-figure="shield">
             <div class="slide-body">
-              <p class="chapter"><span class="num">05</span>Conclusion</p>
+              <p class="chapter"><span class="num">05</span><span class="chapter-name">Conclusion</span></p>
               <h2>Using AI responsibly</h2>
               <ul class="points">
                 <li><b>Verify:</b> treat every answer as a draft, not a fact.</li>
@@ -677,7 +615,7 @@ body.is-locked { overflow: hidden; }
 
           <article class="slide" data-figure="gem">
             <div class="slide-body">
-              <p class="chapter"><span class="num">05</span>Conclusion</p>
+              <p class="chapter"><span class="num">05</span><span class="chapter-name">Conclusion</span></p>
               <h2>Key takeaways</h2>
               <ul class="points">
                 <li>AI is already part of everyday life.</li>
@@ -710,6 +648,8 @@ body.is-locked { overflow: hidden; }
   </div>
 </div>
 
+<div class="cursor" id="cursor" aria-hidden="true"><i class="cursor-ring"></i><i class="cursor-dot"></i></div>
+
 <button class="fs-btn" id="fs-btn" type="button" aria-label="Full screen" title="Full screen (F)">
   <svg class="icon-enter" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6.5V2h4.5M11.5 2H16v4.5M16 11.5V16h-4.5M6.5 16H2v-4.5"/></svg>
   <svg class="icon-exit" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 2v4.5H2M16 6.5h-4.5V2M11.5 16v-4.5H16M2 11.5h4.5V16"/></svg>
@@ -720,6 +660,7 @@ body.is-locked { overflow: hidden; }
 <script src="vendor/gsap/ScrollSmoother.min.js"></script>
 <script src="vendor/gsap/ScrollToPlugin.min.js"></script>
 <script src="vendor/gsap/SplitText.min.js"></script>
+<script src="vendor/gsap/ScrambleTextPlugin.min.js"></script>
 <script src="vendor/three/three.min.js"></script>
 <script src="scene.js"></script>
 <script>
@@ -812,6 +753,8 @@ body.is-locked { overflow: hidden; }
   const hasScrollTo = !!window.ScrollToPlugin;
   gsap.registerPlugin(ScrollTrigger);
   if (hasSplit) gsap.registerPlugin(SplitText);
+  const hasScramble = !!window.ScrambleTextPlugin;
+  if (hasScramble) gsap.registerPlugin(ScrambleTextPlugin);
   if (hasSmoother) gsap.registerPlugin(ScrollSmoother);
   if (hasScrollTo) gsap.registerPlugin(ScrollToPlugin);
 
@@ -1410,7 +1353,7 @@ body.is-locked { overflow: hidden; }
     const out = [0];
     if (!stage.classList.contains("no-head")) out.push(labelY(mainTl, "contents-shown"));
     parts.forEach((p, i) => out.push(labelY(mainTl, "part-" + i)));
-    if (deckTl && deckTl.scrollTrigger) stops.forEach((s, k) => out.push(labelY(deckTl, "stop-" + k)));
+    if (deckTl && deckTl.scrollTrigger) slides.forEach((s, i) => out.push(labelY(deckTl, "slide-" + i)));
     out.push(Math.round(ScrollTrigger.maxScroll(window)));
     return out;
   }
@@ -1589,6 +1532,7 @@ body.is-locked { overflow: hidden; }
        .fromTo(".thanks", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.8 }, 0.6);
 
     buildDeck();
+    buildCursor();
 
     // Every refresh (resize, rotation, fullscreen, late fonts) re-measures the layout. The pinned distances change
     // with the window, so afterwards the page is put back at the same point of the talk.
@@ -1623,45 +1567,37 @@ body.is-locked { overflow: hidden; }
   }
 
   /* ---------------- Slides ---------------- */
-  // One pinned section and one scrubbed timeline. The talk stops once on every slide, and once more on every further
-  // panel inside a slide (those arrive sideways). The same position tells the figure which shape to form and where.
-  const stops = [];                              // { slide, panel } in the order of the talk
+  // One pinned section and one scrubbed timeline with a stop on every slide. Its position also tells the figure
+  // which shape to form and on which side to stand.
   const deckState = { pos: 0, gather: 0 };
-  const pointer = { x: 0, y: 0 };
-  const figureBox = { wide: true, y: 0.5, w: 0.4, h: 0.74 };
+  const pointer = { x: 0, y: 0, force: 0 };
+  const figureBox = { wide: true, x: 0.735, y: 0.5, w: 0.4, h: 0.74 };
   const sideOf = (slide) => (slide % 2 ? 0.265 : 0.735);       // the figure alternates: right, left, right…
   const ease = (t) => t * t * (3 - 2 * t);
   let figure = null;
-  let turnsBefore = [];                          // sideways steps taken before each stop: one turn of the figure each
-  let shownStop = -1;
+  let shownSlide = -1;
   const pad2 = (n) => String(n).padStart(2, "0");
 
   function deckChanged() {
-    if (!stops.length) return;
-    const lastStop = stops.length - 1;
-    const k = clamp(Math.floor(deckState.pos), 0, lastStop);
-    const a = stops[k];
-    const b = stops[Math.min(lastStop, k + 1)];
+    const last = slides.length - 1;
+    const k = clamp(Math.floor(deckState.pos), 0, last);
     const f = clamp(deckState.pos - k, 0, 1);
     const m = ease(clamp((f - 0.18) / 0.72, 0, 1));            // changes happen between the stops, not on them
     if (figure) {
-      const sameSlide = a.slide === b.slide;
-      figure.progress(sameSlide ? a.slide : a.slide + f);
-      figure.twist(turnsBefore[k] + (sameSlide && b !== a ? m : 0));
+      figure.progress(deckState.pos);
       figure.gather(deckState.gather);
       if (figureBox.wide) {
-        const x = lerp(sideOf(a.slide), sideOf(b.slide), m);
-        figure.place({ x: x, y: figureBox.y, w: figureBox.w, h: figureBox.h });
-        deck.style.setProperty("--fx", (x * 100).toFixed(1) + "%");
+        figureBox.x = lerp(sideOf(k), sideOf(Math.min(last, k + 1)), m);
+        figure.place(figureBox);
+        deck.style.setProperty("--fx", (figureBox.x * 100).toFixed(1) + "%");
       }
     }
-    const near = stops[clamp(Math.round(deckState.pos), 0, lastStop)];
-    if (near !== stops[shownStop]) {
-      shownStop = stops.indexOf(near);
-      deckCount.textContent = pad2(near.slide + 1) + " / " + pad2(slides.length);
-      $$(".pager i", slides[near.slide]).forEach((dot, j) => dot.classList.toggle("is-on", j === near.panel));
+    const near = clamp(Math.round(deckState.pos), 0, last);
+    if (near !== shownSlide) {
+      shownSlide = near;
+      deckCount.textContent = pad2(near + 1) + " / " + pad2(slides.length);
     }
-    deckFill.style.transform = "scaleX(" + (deckState.pos / Math.max(1, lastStop)).toFixed(4) + ")";
+    deckFill.style.transform = "scaleX(" + (deckState.pos / Math.max(1, last)).toFixed(4) + ")";
   }
 
   function measureDeck() {
@@ -1688,7 +1624,8 @@ body.is-locked { overflow: hidden; }
       const fits = room - top > uh * 0.16;
       $("#figure").style.opacity = fits ? "" : "0.3";          // no room: it stays in the background
       const zone = fits ? room - top : uh * 0.5;
-      figure.place({ x: 0.5, y: (top + zone / 2) / h, w: 0.86, h: (zone * 0.96) / h });
+      figureBox.x = 0.5; figureBox.y = (top + zone / 2) / h; figureBox.w = 0.86; figureBox.h = (zone * 0.96) / h;
+      figure.place(figureBox);
     }
     deckChanged();
   }
@@ -1703,58 +1640,71 @@ body.is-locked { overflow: hidden; }
       }
     } catch (e) { figure = null; }
     if (!figure) $("#figure").style.display = "none";
+    const n = slides.length;
 
-    // The stops of the talk, and a row of dots under every slide that has more than one panel
-    const panelsOf = slides.map((s) => $$(".panel", s));
-    slides.forEach((s, i) => {
+    // The cast of every slide
+    const cast = slides.map((s, i) => {
       s.classList.toggle("is-flipped", i % 2 === 1);
-      const count = Math.max(1, panelsOf[i].length);
-      for (let j = 0; j < count; j++) stops.push({ slide: i, panel: j });
-      if (count > 1) {
-        const pager = document.createElement("p");
-        pager.className = "pager";
-        pager.setAttribute("aria-hidden", "true");
-        for (let j = 0; j < count; j++) pager.appendChild(document.createElement("i"));
-        pager.appendChild(document.createElement("span")).textContent = "→";
-        s.firstElementChild.appendChild(pager);
-      }
+      const head = $("h2", s);
+      const split = hasSplit ? SplitText.create(head, { type: "words", mask: "words" }) : null;
+      return {
+        el: s,
+        chapter: $(".chapter", s),
+        words: split ? split.words : [head],
+        coded: $$(".chapter-name, .tag, .year, .cols h3", s),                                   // mono labels: decoded
+        rows: $$(".lead, .points li, .timeline li > span:last-child, .prompt, .note", s),      // running text: wiped in
+      };
     });
-    turnsBefore = stops.map((s, k) => stops.slice(1, k + 1).filter((t, n) => t.slide === stops[n].slide).length);
 
-    // What moves when something arrives: blocks, and the entries of lists one by one
-    const pieces = (els) => {
-      const out = [];
-      els.forEach((el) => {
-        const items = el.matches(".points, .timeline, .odds") ? $$("li", el)
-          : el.matches(".cols") ? Array.from(el.children)
-          : el.matches(".facts") ? $$("dd", el).map((dd) => [dd.previousElementSibling, dd])
-          : [el];
-        items.forEach((item) => out.push(item));
-      });
-      return out;
+    // A chapter number for every change of chapter (and for the first slide)
+    const numberOf = (i) => $(".chapter .num", slides[i]).textContent;
+    const ghosts = slides.map((s, i) => {
+      if (i > 0 && numberOf(i) === numberOf(i - 1)) return null;
+      const g = document.createElement("span");
+      g.className = "ghost";
+      g.setAttribute("aria-hidden", "true");
+      g.textContent = numberOf(i);
+      deckUi.insertBefore(g, deckUi.firstChild);
+      gsap.set(g, { xPercent: -50, yPercent: -50 });
+      return g;
+    });
+
+    // A slide arrives: its number crosses the screen, the label is decoded, the heading rises word by word out of
+    // its own line, and the text is drawn in from the left, row after row. `d` stretches or squeezes the timing.
+    const WIPE_FROM = "inset(-12% 100% -12% 0%)";
+    const WIPE_TO = "inset(-12% -3% -12% 0%)";
+    const arrive = (tl, i, at, d) => {
+      const c = cast[i];
+      if (ghosts[i]) {
+        tl.fromTo(ghosts[i], { x: () => 0.55 * L.vw }, { x: () => -0.55 * L.vw, duration: 0.8 * d, ease: "none" }, at - 0.3 * d)
+          .fromTo(ghosts[i], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2 * d, ease: "power1.out" }, at - 0.3 * d)
+          .to(ghosts[i], { autoAlpha: 0, duration: 0.24 * d, ease: "power1.in" }, at + 0.26 * d);
+      }
+      tl.fromTo(c.chapter, { opacity: 0 }, { opacity: 1, duration: 0.1 * d, ease: "none" }, at)
+        .from(c.words, { yPercent: 112, duration: 0.3 * d, stagger: { amount: 0.1 * d }, ease: "power3.out" }, at + 0.02 * d);
+      if (hasScramble) {
+        c.coded.forEach((el, j) => {
+          tl.to(el, { duration: 0.26 * d, ease: "none", scrambleText: { text: el.textContent, chars: "upperCase", speed: 0.5, revealDelay: 0.15 } },
+            at + (el.classList.contains("chapter-name") ? 0 : 0.1 * d + (j / Math.max(1, c.coded.length)) * 0.2 * d));
+        });
+      }
+      if (c.rows.length) {
+        tl.fromTo(c.rows, { clipPath: WIPE_FROM, x: -14 }, { clipPath: WIPE_TO, x: 0, duration: 0.26 * d, stagger: { amount: 0.2 * d }, ease: "power2.out" }, at + 0.1 * d);
+      }
     };
-    const unitsOf = (i) => {
-      const out = [];
-      Array.from(slides[i].firstElementChild.children).forEach((el) => {
-        if (el.matches(".panels")) pieces(Array.from(panelsOf[i][0].children)).forEach((u) => out.push(u));
-        else pieces([el]).forEach((u) => out.push(u));
-      });
-      return out;
-    };
-    const S = stops.length;
 
-    // Arriving: the figure gathers and the first slide fades up while the section scrolls into place.
-    gsap.timeline({ defaults: { ease: "none" }, scrollTrigger: { trigger: deck, start: "top 85%", end: "top top", scrub: 0.8 } })
-      .fromTo(deckState, { gather: 0 }, { gather: 1, duration: 1, onUpdate: deckChanged }, 0)
-      .fromTo(unitsOf(0), { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.45, stagger: { amount: 0.3 }, ease: "power2.out" }, 0.3);
+    // Arriving at the first slide: the figure gathers while the section scrolls into place.
+    const enter = gsap.timeline({ defaults: { ease: "none" }, scrollTrigger: { trigger: deck, start: "top 85%", end: "top top", scrub: 0.8, invalidateOnRefresh: true } });
+    enter.fromTo(deckState, { gather: 0 }, { gather: 1, duration: 1, onUpdate: deckChanged }, 0);
+    arrive(enter, 0, 0.4, 1.05);
 
-    // One unit of time per stop. Whatever leaves starts at +0.18; whatever arrives is complete before the next stop.
+    // One unit of time per slide. A slide leaves at +0.18: the heading goes up through its line, the rest fades.
     const dtl = gsap.timeline({
       defaults: { ease: "none" },
       scrollTrigger: {
         trigger: deck,
         start: "top top",
-        end: () => "+=" + Math.round((deck.offsetHeight || window.innerHeight) * (S - 1 + 0.4)),
+        end: () => "+=" + Math.round((deck.offsetHeight || window.innerHeight) * (n - 1 + 0.4)),
         pin: true,
         scrub: 0.8,
         anticipatePin: 1,
@@ -1762,28 +1712,22 @@ body.is-locked { overflow: hidden; }
       },
     });
     deckTl = dtl;
-    dtl.to(deckState, { pos: S - 1, duration: S - 1, onUpdate: deckChanged }, 0);
-    slides.forEach((s, i) => { if (i > 0) gsap.set(s, { autoAlpha: 0 }); });
-    stops.forEach((stop, k) => {
-      dtl.addLabel("stop-" + k, k);
-      if (k === S - 1) return;
-      const next = stops[k + 1];
-      if (next.slide !== stop.slide) {
-        // next slide: this one lifts away, the next one rises in piece by piece
-        dtl.fromTo(slides[stop.slide], { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -22, duration: 0.26, ease: "power1.in", immediateRender: false }, k + 0.18)
-           .set(slides[next.slide], { autoAlpha: 1, y: 0 }, k + 0.48)
-           .fromTo(unitsOf(next.slide), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, stagger: { amount: 0.16 }, ease: "power2.out" }, k + 0.5);
-      } else {
-        // next panel of the same slide: a step sideways
-        const from = panelsOf[stop.slide][stop.panel];
-        const to = panelsOf[stop.slide][next.panel];
-        dtl.fromTo(from, { autoAlpha: 1, xPercent: 0 }, { autoAlpha: 0, xPercent: -16, duration: 0.3, ease: "power2.in", immediateRender: false }, k + 0.18)
-           .fromTo(to, { autoAlpha: 0, xPercent: 16 }, { autoAlpha: 1, xPercent: 0, duration: 0.4, ease: "power2.out" }, k + 0.48);
+    dtl.to(deckState, { pos: n - 1, duration: n - 1, onUpdate: deckChanged }, 0);
+    slides.forEach((s, i) => {
+      dtl.addLabel("slide-" + i, i);
+      if (i > 0) {
+        gsap.set(s, { autoAlpha: 0 });
+        dtl.set(s, { autoAlpha: 1 }, i - 0.54);
+        arrive(dtl, i, i - 0.52, 1);
+      }
+      if (i < n - 1) {
+        dtl.fromTo(cast[i].words, { yPercent: 0 }, { yPercent: -112, duration: 0.22, stagger: { amount: 0.06 }, ease: "power2.in", immediateRender: false }, i + 0.16)
+           .fromTo(s, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.24, ease: "power1.in", immediateRender: false }, i + 0.2);
       }
     });
-    dtl.to({}, { duration: 0.4 }, S - 1);        // a beat on the last slide before the page moves on
+    dtl.to({}, { duration: 0.4 }, n - 1);        // a beat on the last slide before the page moves on
 
-    // The figure is only drawn while the section is on screen.
+    // The figure is only drawn while the section is on screen. With a mouse, its points give way to the pointer.
     if (figure) {
       const seen = () => {
         const st = dtl.scrollTrigger;
@@ -1791,14 +1735,55 @@ body.is-locked { overflow: hidden; }
         const h = window.innerHeight;
         return y > st.start - h && y < st.end + h;
       };
-      if (FINE) window.addEventListener("pointermove", (e) => {
-        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
-      }, { passive: true });
+      if (FINE) {
+        window.addEventListener("pointermove", (e) => {
+          if (e.pointerType && e.pointerType !== "mouse") return;
+          const r = deck.getBoundingClientRect();
+          pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+          pointer.y = ((e.clientY - r.top) / r.height) * 2 - 1;
+          pointer.force = 1;
+          // near the figure the ring of the pointer opens up to the reach of its push
+          const dx = (e.clientX - r.left) / r.width - figureBox.x;
+          const dy = ((e.clientY - r.top) / r.height - figureBox.y) * (r.height / r.width);
+          const near = Math.hypot(dx, dy) < figureBox.w * 0.42 && r.top < 4 && r.bottom > window.innerHeight * 0.7;
+          $("#cursor").classList.toggle("is-force", near);
+        }, { passive: true });
+        document.documentElement.addEventListener("mouseleave", () => { pointer.force = 0; });
+      }
       gsap.ticker.add((time) => { if (seen()) figure.render(time, pointer); });
     }
     deckChanged();
     measureDeck();
+  }
+
+  /* ---------------- Pointer ---------------- */
+  // A dot at the pointer and a ring that follows a moment later. Only with a mouse.
+  function buildCursor() {
+    const cursor = $("#cursor");
+    if (!cursor || !FINE) return;
+    const dot = $(".cursor-dot", cursor);
+    const ring = $(".cursor-ring", cursor);
+    const dotX = gsap.quickSetter(dot, "x", "px");
+    const dotY = gsap.quickSetter(dot, "y", "px");
+    const ringX = gsap.quickTo(ring, "x", { duration: 0.45, ease: "power3" });
+    const ringY = gsap.quickTo(ring, "y", { duration: 0.45, ease: "power3" });
+    let placed = false;
+    window.addEventListener("pointermove", (e) => {
+      if (e.pointerType && e.pointerType !== "mouse") return;
+      if (!placed) {                               // first sign of a mouse: take over from the system pointer
+        placed = true;
+        root.classList.add("has-cursor");
+        gsap.set(ring, { x: e.clientX, y: e.clientY });
+      }
+      dotX(e.clientX); dotY(e.clientY);
+      ringX(e.clientX); ringY(e.clientY);
+      cursor.classList.add("is-on");
+      cursor.classList.toggle("is-link", !!(e.target && e.target.closest && e.target.closest("button, a")));
+    }, { passive: true });
+    window.addEventListener("pointerdown", () => cursor.classList.add("is-down"), { passive: true });
+    window.addEventListener("pointerup", () => cursor.classList.remove("is-down"), { passive: true });
+    document.documentElement.addEventListener("mouseleave", () => cursor.classList.remove("is-on"));
+    document.addEventListener("scroll", () => { if (!deckTl || currentY() < deckTl.scrollTrigger.start - 4) cursor.classList.remove("is-force"); }, { passive: true });
   }
 
   function maybeReveal() {

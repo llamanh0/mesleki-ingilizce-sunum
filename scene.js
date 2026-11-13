@@ -343,27 +343,44 @@
     return out;
   }
 
+  // How a figure arrives. Each one orders the points differently and sends them on a different path:
+  //   swirl: at random, around the axis | sweep: left to right, almost straight
+  //   rise:  from the ground up         | burst: from the centre outwards
+  const STYLES = { swirl: 0, sweep: 1, rise: 2, burst: 3 };
+  const ARRIVAL = {
+    globe: "swirl", network: "burst", helix: "rise", phone: "sweep", scale: "swirl", orbit: "burst",
+    transformer: "rise", compare: "sweep", bars: "rise", shield: "swirl", gem: "burst",
+  };
+
   const VERT = [
     "attribute vec4 aFrom;",
     "attribute vec4 aTo;",
     "attribute vec4 aSeed;",
     "uniform float uMix;",
+    "uniform vec4 uStyle;",        // one-hot: swirl, sweep, rise, burst
     "uniform float uGather;",
     "uniform float uTime;",
     "uniform float uSize;",
     "uniform float uPx;",
     "uniform float uMinPx;",
     "uniform vec2 uDepth;",
+    "uniform vec3 uRay;",          // direction of the pointer's ray, in view space
+    "uniform float uPush;",        // how strongly the points give way to it
     "varying float vAccent;",
     "varying float vAlpha;",
     "void main() {",
-    "  float t = clamp(uMix * 1.4 - aSeed.x * 0.4, 0.0, 1.0);",        // every point leaves at its own moment
+    "  vec3 goal = aTo.xyz;",
+    "  vec4 order = vec4(aSeed.x, (goal.x + 1.4) / 2.8, (goal.y + 1.4) / 2.8, length(goal) / 1.6);",
+    "  float lead = dot(uStyle, vec4(0.4, 0.62, 0.62, 0.62));",          // how far the last point starts behind the first
+    "  float delay = clamp(dot(uStyle, order), 0.0, 1.0) * (lead - 0.08 * (1.0 - uStyle.x)) + 0.08 * (1.0 - uStyle.x) * aSeed.x;",
+    "  float t = clamp(uMix * (1.0 + lead) - delay, 0.0, 1.0);",
     "  t = t * t * (3.0 - 2.0 * t);",
-    "  vec3 p = mix(aFrom.xyz, aTo.xyz, t);",
+    "  vec3 p = mix(aFrom.xyz, goal, t);",
     "  float arc = sin(t * 3.14159265);",
     "  vec3 dir = normalize(aSeed.yzw - 0.5 + 0.0001);",
-    "  p += dir * arc * 0.5;",                                          // on the way: out of line, and around the axis
-    "  float a = arc * (aSeed.y - 0.5) * 2.4;",
+    "  p += dir * arc * dot(uStyle, vec4(0.5, 0.14, 0.2, 0.85));",       // on the way: out of line…
+    "  p.y += arc * dot(uStyle, vec4(0.0, 0.1, -0.5, 0.0));",
+    "  float a = arc * (aSeed.y - 0.5) * dot(uStyle, vec4(2.4, 0.3, 0.7, 1.5));",   // …and around the axis
     "  float c = cos(a);",
     "  float s = sin(a);",
     "  p.xz = mat2(c, -s, s, c) * p.xz;",
@@ -372,6 +389,9 @@
     "  g = g * g * (3.0 - 2.0 * g);",
     "  p = mix(dir * (2.4 + aSeed.x * 2.4), p, g);",
     "  vec4 mv = modelViewMatrix * vec4(p, 1.0);",
+    "  vec3 off = mv.xyz - uRay * dot(mv.xyz, uRay);",                   // from the pointer's ray to this point
+    "  float near = 1.0 - smoothstep(0.0, 0.62, length(off));",
+    "  mv.xyz += normalize(off + 0.0001) * near * near * uPush * (0.5 + aSeed.z);",
     "  gl_Position = projectionMatrix * mv;",
     "  float accent = mix(aFrom.w, aTo.w, t);",
     "  vAccent = accent;",
@@ -435,6 +455,7 @@
       blending: T.NormalBlending,
       uniforms: {
         uMix: { value: 0 }, uGather: { value: 0 }, uTime: { value: 0 },
+        uStyle: { value: [1, 0, 0, 0] }, uRay: { value: new T.Vector3(0, 0, -1) }, uPush: { value: 0 },
         uSize: { value: 0.0175 }, uPx: { value: 1 }, uMinPx: { value: 1 },
         uDepth: { value: new T.Vector2(DIST - 1.4, DIST + 1.6) },
         uInk: { value: new T.Color(0x161c1f) }, uAccent: { value: new T.Color(0xb4602c) },
@@ -454,7 +475,7 @@
     let wasSpinning = false;
     let angle = 0;
     let last = 0;
-    let twist = 0;         // extra full turns, one for every step sideways inside a slide
+    let push = 0;
     const SIZE = 0.0145;   // diameter of a point, in figure units
     let box = { x: 0.5, y: 0.5, w: 0.5, h: 0.7 };
     const look = { x: 0, y: 0 };
@@ -495,6 +516,8 @@
           to.array.set(sets[Math.min(names.length - 1, i + 1)]);
           from.needsUpdate = true;
           to.needsUpdate = true;
+          const style = STYLES[ARRIVAL[names[Math.min(names.length - 1, i + 1)]]] || 0;
+          for (let k = 0; k < 4; k++) material.uniforms.uStyle.value[k] = k === style ? 1 : 0;
         }
         const local = clamp(pos - i, 0, 1);
         const m = clamp((local - 0.18) / 0.72, 0, 1);            // the change happens between the stops, not on them
@@ -502,8 +525,6 @@
         const eased = m * m * (3 - 2 * m);
         spin = lerp(SPIN[names[i]] ? 1 : 0, SPIN[names[Math.min(names.length - 1, i + 1)]] ? 1 : 0, eased);
       },
-      // Extra turns around the vertical axis: 1 is one full turn
-      twist(v) { twist = v; },
       // time in seconds; pointer in -1…1 on both axes
       render(time, pointer) {
         if (!width) return;
@@ -516,9 +537,14 @@
         else if (spin < 0.001) { angle = 0; wasSpinning = false; }
         else if (wasSpinning) { angle = ((((angle + Math.PI) % TAU) + TAU) % TAU) - Math.PI; wasSpinning = false; }
         // Swaying figures move about as fast as the turning ones, so no slide feels slower than the one before.
-        group.rotation.y = Math.sin(time * 0.42) * 0.52 * (1 - spin) + angle * spin + twist * TAU + look.x * 0.28;
+        group.rotation.y = Math.sin(time * 0.42) * 0.52 * (1 - spin) + angle * spin + look.x * 0.28;
         group.rotation.x = 0.1 + Math.sin(time * 0.23) * 0.05 + look.y * 0.14;
         material.uniforms.uTime.value = time;
+        // The points under the pointer step aside. pointer.force: 0 = no pointer (touch, or outside the window)
+        const half = Math.tan((FOV * Math.PI) / 360);
+        push += ((pointer && pointer.force ? 0.34 * group.scale.x : 0) - push) * 0.08;
+        material.uniforms.uPush.value = push;
+        if (pointer) material.uniforms.uRay.value.set(pointer.x * half * (width / height), -pointer.y * half, -1).normalize();
         renderer.render(scene, camera);
       },
       dispose() { geometry.dispose(); material.dispose(); renderer.dispose(); },
